@@ -60,7 +60,7 @@ kubectl expose deployment nginx \
 kubectl create ingress nginx \
 --namespace=nginx \
 --class=nginx \
---rule="192.168.1.15.nip.io/nginx*=nginx:8080"
+--rule="<server-private-ip>.nip.io/nginx*=nginx:8080"
 
 kubectl annotate ingress nginx \
 --namespace=nginx nginx.ingress.kubernetes.io/rewrite-target="/"
@@ -71,8 +71,8 @@ kubectl annotate ingress nginx \
 Use curl to test that NGINX Ingress Controller is properly routing traffic to NGINX HTTP server:
 
 ```bash
-curl http://192.168.1.15.nip.io/nginx
-curl https://192.168.1.15.nip.io/nginx --insecure
+curl http://<server-private-ip>.nip.io/nginx
+curl https://<server-private-ip>.nip.io/nginx --insecure
 ```
 
 ### 5. Cleanup
