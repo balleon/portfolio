@@ -1,7 +1,6 @@
 package main
 
 import (
-	//"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -14,12 +13,10 @@ import (
 	"path/filepath"
 )
 
-// VersionResponse is a struct to represent the Kubernetes version as JSON.
 type VersionResponse struct {
 	GitVersion string `json:"gitVersion"`
 }
 
-// getKubernetesClient initializes the Kubernetes clientset.
 func getKubernetesClient() (*kubernetes.Clientset, error) {
 	kubeconfig := filepath.Join(homedir.HomeDir(), ".kube", "config")
 	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
@@ -35,7 +32,6 @@ func getKubernetesClient() (*kubernetes.Clientset, error) {
 	return clientset, nil
 }
 
-// versionHandler handles GET requests to /version and returns the cluster version.
 func versionHandler(w http.ResponseWriter, r *http.Request) {
 	clientset, err := getKubernetesClient()
 	if err != nil {

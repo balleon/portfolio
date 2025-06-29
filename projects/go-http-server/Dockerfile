@@ -2,7 +2,7 @@ FROM golang:1.24-alpine AS builder
 
 WORKDIR /app
 
-COPY . .
+COPY ./source/ .
 
 RUN go build -o kube-version
 
