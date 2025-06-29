@@ -18,6 +18,8 @@ This Go program runs a web server that listens for HTTP GET requests at `/versio
 Initializes, downloads dependencies and runs a set of checks:
 
 ```bash
+docker build --tag kube-version:latest .
+
 cd ./source
 
 go mod init github.com/balleon/kubernetes-version
@@ -32,8 +34,6 @@ golangci-lint run
 Run the application locally and retrieve the Kubernetes version:
 
 ```bash
-cd ./source
-
 go run main.go
 
 curl http://<server-private-ip>:8080/version
@@ -42,8 +42,6 @@ curl http://<server-private-ip>:8080/version
 Run the application inside a container and retrieve the Kubernetes version:
 
 ```bash
-docker build --tag kube-version:latest .
-
 docker run \
 --name kube-version \
 --detach \
