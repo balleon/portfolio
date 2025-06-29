@@ -19,7 +19,7 @@ This guide describes:
 
 ## Usage
 
-### 1. Initializes Go package
+### 1. Initializes Go package with Docker image
 
 Initializes, downloads dependencies, runs a set of checks and build the Docker image:
 
