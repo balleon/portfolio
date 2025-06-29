@@ -1,6 +1,10 @@
 # Go HTTP server on Kubernetes
 
-This Go program runs a web server that listens for HTTP GET requests at `/version`. When accessed, it connects to a Kubernetes cluster (using your `kubeconfig` or Kubernetes `ServiceAccount`) and returns the cluster's Kubernetes version in JSON format. This guide describes how to build the application's Docker image from the Go source code, then deploy it on Kubernetes.
+This Go program runs a web server that listens for HTTP GET requests at `/version`. When accessed, it connects to a Kubernetes cluster (using your `kubeconfig` or Kubernetes `ServiceAccount`) and returns the cluster's Kubernetes version in JSON format.  
+
+This guide describes:
+- how to build the application's Docker image from the Go source code
+- then deploy it on Kubernetes.
 
 ## Prerequisites
 
@@ -49,5 +53,5 @@ curl http://<hostname>/version
 Tear down everything created in this guide:
 
 ```bash
-kubectl delete --filename={namespace.yaml,deployment.yaml,service.yaml,ingress.yaml}
+kubectl delete --filename=./deploy/kubernetes/{namespace.yaml,deployment.yaml,service.yaml,ingress.yaml}
 ```
