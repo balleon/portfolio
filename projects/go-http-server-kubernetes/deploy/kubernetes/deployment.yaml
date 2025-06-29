@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: kube-version
+  name: kube-version
+  namespace: kube-version
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kube-version
+  template:
+    metadata:
+      labels:
+        app: kube-version
+    spec:
+      containers:
+      - image: kube-version:latest
+        name: kube-version
+        ports:
+        - containerPort: 8080
+        livenessProbe:
+          httpGet:
+            path: /version
+            port: 8080
+        readinessProbe:
+          httpGet:
+            path: /version
+            port: 8080
