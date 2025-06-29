@@ -38,7 +38,7 @@ terraform init
 
 ### 2. Apply Terraform
 
-To deploy the infrastructure and Kubernetes resources, run:
+To deploy the Kubernetes resources, run:
 
 ```bash
 terraform apply
