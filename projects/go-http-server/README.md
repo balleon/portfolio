@@ -6,6 +6,8 @@ This Go program runs a web server that listens for HTTP GET requests at `/versio
 
 - Access to a Linux or Unix-like terminal
 - A Kubernetes cluster (Minikube, EKS, GKE)
+- A configured `~/.kube/config` file
+- [Docker](https://docs.docker.com/engine/install/)
 - [Go](https://go.dev/doc/install)
 - [golangci-lint](https://golangci-lint.run/welcome/install/)
 
@@ -23,12 +25,29 @@ golangci-lint fmt
 golangci-lint run
 ```
 
-### 2. Run application
+### 2. Run the application
 
-Run the application and retrieve the Kubernetes version:
+Run the application locally and retrieve the Kubernetes version:
 
 ```bash
 go run main.go
 
 curl http://<server-private-ip>:8080/version
+```
+
+Run the application inside a container and retrieve the Kubernetes version:
+
+```bash
+docker build --tag kube-version:latest .
+
+docker run \
+--name kube-version \
+--detach \
+--publish 8080:8080 \
+--volume ${HOME}/.kube/config:/root/.kube/config:ro \
+kube-version:latest
+
+curl http://<server-private-ip>:8080/version
+
+docker rm --force kube-version
 ```
