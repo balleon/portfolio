@@ -4,7 +4,7 @@ This guide contains the Helm-based deployment of [Kyverno](https://kyverno.io/),
 
 - A **Helm Release** for **Kyverno** with Helm
 - Two policies are included in this setup:
-  - **Disallow Privileged Containers**: Prevents the use of privileged containers to enforce pod security.
+  - **Disallow Privileged Containers**: Prevents the use of privileged containers to enforce Pods security.
   - **Require Label**: Ensures all resources have specific a label for proper organization and governance.
 
 ## Prerequisites
@@ -36,7 +36,7 @@ helm install kyverno kyverno/kyverno \
 
 ### 1. Disallow Privileged Containers
 
-Blocks the creation of pods that run containers with the `privileged: true` setting.
+Blocks the creation of Pods that run containers with the `privileged: true` setting.
 
 ```bash
 kubectl apply --filename=policies/disallow-privileged-containers.yaml
