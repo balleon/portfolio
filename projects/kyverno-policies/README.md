@@ -16,8 +16,6 @@ This guide contains the Helm-based deployment of [Kyverno](https://kyverno.io/),
 
 ## Installation
 
-### 1. Deploy Kyverno
-
 Deploy Kyverno using Helm:
 
 ```bash
