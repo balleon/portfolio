@@ -2,7 +2,8 @@
 
 This guide shows how to deploy and use `Monitoring` and `Observability` tools.
 
-This Terraform configuration deploys the [Kube-Prometheus-Stack](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack), [Loki](https://github.com/grafana/loki/tree/main/production/helm/loki) and [Promtail](https://github.com/grafana/helm-charts/tree/main/charts/promtail) using the [Helm provider](https://registry.terraform.io/providers/hashicorp/helm/latest/docs) on a Kubernetes cluster. This Terraform configuration:
+This Terraform configuration deploys the [Kube-Prometheus-Stack](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack), [Loki](https://github.com/grafana/loki/tree/main/production/helm/loki) and [Promtail](https://github.com/grafana/helm-charts/tree/main/charts/promtail) using the [Helm provider](https://registry.terraform.io/providers/hashicorp/helm/latest/docs) on a Kubernetes cluster.
+This Terraform configuration:  
 
 - Configures the `Helm provider` to use your local Kubernetes config.
 - Installs the `Grafana` Helm chart with pre-configured dashboards and datasources.
@@ -21,8 +22,8 @@ All Terraform resources are defined in a single file: `main.tf`.
     - `promtail` (created automatically)
 - **Helm Releases** 
     - `kube-prometheus-stack`
-    - `Loki`
-    - `Promtail`
+    - `loki`
+    - `promtail`
 
 ## Prerequisites
 
