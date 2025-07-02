@@ -2,9 +2,9 @@
 
 This guide shows how to deploy and use `Monitoring` and `Observability` tools.
 
-This Terraform configuration deploys the [kube-prometheus-stack](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack), [loki](https://github.com/grafana/loki/tree/main/production/helm/loki) and [promtail](https://github.com/grafana/helm-charts/tree/main/charts/promtail) using the [Helm provider](https://registry.terraform.io/providers/hashicorp/helm/latest/docs) on a Kubernetes cluster. This Terraform configuration:
+This Terraform configuration deploys the [Kube-Prometheus-Stack](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack), [Loki](https://github.com/grafana/loki/tree/main/production/helm/loki) and [Promtail](https://github.com/grafana/helm-charts/tree/main/charts/promtail) using the [Helm provider](https://registry.terraform.io/providers/hashicorp/helm/latest/docs) on a Kubernetes cluster. This Terraform configuration:
 
-- Configures the Helm provider to use your local Kubernetes config.
+- Configures the `Helm provider` to use your local Kubernetes config.
 - Installs the `Grafana` Helm chart with pre-configured dashboards and datasources.
 - Installs the `Alertmanager` Helm chart with pre-configured alerts.
 - Installs the `Prometheus Operator` Helm chart with `Node Exporter`.
@@ -53,7 +53,7 @@ terraform apply
 
 Prometheus should be available at `https://<hostname>/prometheus`  
 Alertmanager should be available at `https://<hostname>/alertmanager`  
-Grafana should be available at `https://<hostname>/grafana`  
+Grafana should be available at `https://<hostname>/grafana` with `Prometheus` and `Loki` datasources  
 
 ### 3. Cleanup
 
