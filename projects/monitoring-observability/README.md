@@ -1,18 +1,28 @@
-# Monitoring with Kube Prometheus Stack
+# Monitoring and observability with Prometheus, Grafana and Loki
 
-This Terraform configuration deploys the [kube-prometheus-stack](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack) using the [Helm provider](https://registry.terraform.io/providers/hashicorp/helm/latest/docs) on a Kubernetes cluster. This Terraform configuration:
+This guide shows how to deploy and use `Monitoring` and `Observability` tools.
+
+This Terraform configuration deploys the [kube-prometheus-stack](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack), [loki](https://github.com/grafana/loki/tree/main/production/helm/loki) and [promtail](https://github.com/grafana/helm-charts/tree/main/charts/promtail) using the [Helm provider](https://registry.terraform.io/providers/hashicorp/helm/latest/docs) on a Kubernetes cluster. This Terraform configuration:
 
 - Configures the Helm provider to use your local Kubernetes config.
-- Installs the `Grafana` Helm chart with pre-configured dashboards.
+- Installs the `Grafana` Helm chart with pre-configured dashboards and datasources.
 - Installs the `Alertmanager` Helm chart with pre-configured alerts.
 - Installs the `Prometheus Operator` Helm chart with `Node Exporter`.
+- Installs the `Loki` Helm chart.
+- Installs the `Promtail` Helm chart.
 
 All Terraform resources are defined in a single file: `main.tf`.
 
 ## Components
 
-- **Namespace** `prometheus` (created automatically)
-- **Helm Release** `kube-prometheus-stack` (Kube Prometheus Stack)
+- **Namespace**
+    - `prometheus` (created automatically)
+    - `loki` (created automatically)
+    - `promtail` (created automatically)
+- **Helm Releases** 
+    - `kube-prometheus-stack`
+    - `Loki`
+    - `Promtail`
 
 ## Prerequisites
 
