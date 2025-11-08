@@ -1,19 +1,24 @@
-variable "env" {
-  type = string
+variable "environment" {
+  default = "test"
+  type    = string
 }
 
 variable "cluster_name" {
-  type = string
+  default = "test"
+  type    = string
 }
 
 variable "cluster_cidr" {
-  type = string
+  default = "192.168.0.0/16"
+  type    = string
 }
 
 variable "cluster_private_subnets" {
-  type = list(any)
+  default = ["192.168.1.0/24", "192.168.2.0/24", "192.168.3.0/24"]
+  type    = list(any)
 }
 
 variable "cluster_public_subnets" {
-  type = list(any)
+  default = ["192.168.4.0/24", "192.168.5.0/24", "192.168.6.0/24"]
+  type    = list(any)
 }

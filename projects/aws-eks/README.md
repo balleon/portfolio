@@ -1,11 +1,10 @@
-# Terraform Amazon EKS Cluster with NGINX
+# Terraform Amazon EKS Cluster with Ingress NGINX Controller
 
 This repository contains Terraform code to deploy a Kubernetes environment on AWS. It provisions:
 
 - A **VPC** with public and private subnets
 - An **Amazon EKS Auto Mode** cluster
-- A **Kubernetes Deployment**, **Service**, and **Ingress** for **NGINX**
-- An **Amazon Application Load Balancer** to expose NGINX publicly
+- An **Helm Release** for **Ingress NGINX Controller**
 
 All Terraform resources are defined in a single file: `main.tf`.
 
@@ -13,18 +12,16 @@ All Terraform resources are defined in a single file: `main.tf`.
 
 - **Amazon VPC** (via `terraform-aws-modules/vpc`)
 - **Amazon EKS** (via `terraform-aws-modules/eks`)
-- **Kubernetes provider** configured with EKS outputs
-- **NGINX Deployment** in Kubernetes
-- **Kubernetes Service** (port 8080 -> 80)
-- **Kubernetes Ingress** backed by an **Amazon Application Load Balancer** (⚠️exposed over HTTP only for testing purposes⚠️)
-- **IngressClass** for ALB with default behavior
+- **Helm provider** configured with EKS outputs
+- **Helm Releases** 
+    - `Ingress NGINX Controller for Kubernetes`
 
 ## Prerequisites
 
 - [Terraform](https://www.terraform.io/downloads)
 - [AWS CLI](https://aws.amazon.com/cli/)
 - [kubectl](https://kubernetes.io/docs/tasks/tools/)
-- An Amazon account with permissions to provision VPC, EKS, and Application Load Balancer
+- An Amazon account with permissions to provision VPC, EKS, and Network Load Balancer
 - An Amazon S3 bucket to store Terraform state
 
 ## Usage
@@ -60,14 +57,15 @@ To configure your local kubectl to connect to the cluster, run:
 aws eks update-kubeconfig --name <cluster_name>
 ```
 
-### 4. Accessing NGINX
+### 4. Accessing NGINX Network Load Balancer
 
-Get the Amazon Application Load Balancer address then test it:
+Get the Amazon Network Load Balancer address then test it:
 
 ```bash
-kubectl get ingress --namespace=nginx nginx
+kubectl get service --namespace=ingress-nginx
 
-curl http://<alb-address>
+curl http://<nlb-address>
+curl https://<nlb-address> --insecure
 ```
 
 ### 5. Cleanup
@@ -75,5 +73,7 @@ curl http://<alb-address>
 To delete all resources created by Terraform:
 
 ```bash
+helm uninstall ingress-nginx --namespace=ingress-nginx
+
 terraform destroy
 ```
