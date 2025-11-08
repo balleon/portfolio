@@ -21,7 +21,7 @@ All Terraform resources are defined in a single file: `main.tf`.
 - [Terraform](https://www.terraform.io/downloads)
 - [AWS CLI](https://aws.amazon.com/cli/)
 - [kubectl](https://kubernetes.io/docs/tasks/tools/)
-- An Amazon account with permissions to provision VPC, EKS, and Application Load Balancer
+- An Amazon account with permissions to provision VPC, EKS, and Network Load Balancer
 - An Amazon S3 bucket to store Terraform state
 
 ## Usage
