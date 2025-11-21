@@ -53,7 +53,7 @@ func versionHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	if err := json.NewEncoder(w).Encode(response); err != nil {
-		log.Printf("❌ Failed to encode JSON response: %v", err)
+		log.Printf("Failed to encode JSON response: %v", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}
 }
@@ -66,8 +66,8 @@ func main() {
 
 	http.HandleFunc("/version", versionHandler)
 
-	log.Printf("✅ Server is running at http://0.0.0.0:%s/version", port)
+	log.Printf("Server is running at http://0.0.0.0:%s/version", port)
 	if err := http.ListenAndServe("0.0.0.0:"+port, nil); err != nil {
-		log.Fatalf("❌ Failed to start server: %v", err)
+		log.Fatalf("Failed to start server: %v", err)
 	}
 }
