@@ -22,9 +22,9 @@ func main() {
 	// Extract Secrets
 	secretList := listSecrets(clientset, namespaces)
 
-	// Identify used Secrets in Deployments (imagePullSecrets, Volumes, Containers and initContainers)
+	// Identify used Secrets (imagePullSecrets, Volumes, Containers and initContainers)
 	for _, i := range secretList {
-		if !secretDeployments(clientset, i) && !secretStateFulsets(clientset, i) {
+		if !secretDeployments(clientset, i) && !secretStateFulsets(clientset, i) && !secretDaemonSets(clientset, i) {
 			fmt.Printf("Secret %s is unused.\n", i)
 		}
 	}
@@ -221,6 +221,84 @@ func secretStateFulsets(clientset *kubernetes.Clientset, secretName string) bool
 			for k := range statefulsets.Items[i].Spec.Template.Spec.InitContainers[j].Env {
 				if statefulsets.Items[i].Spec.Template.Spec.InitContainers[j].Env[k].ValueFrom.SecretKeyRef != nil {
 					if statefulsets.Items[i].Spec.Template.Spec.InitContainers[j].Env[k].ValueFrom.SecretKeyRef.Name == secretName {
+						initEnv = true
+					}
+				}
+			}
+		}
+
+		// Determine Secret usage
+		if imagePullSecrets || Volumes || EnvFrom || Env || initEnvFrom || initEnv {
+			isUsed = true
+		} else {
+			isUsed = false
+		}
+	}
+
+	return isUsed
+}
+
+func secretDaemonSets(clientset *kubernetes.Clientset, secretName string) bool {
+	var isUsed bool
+
+	// Extract DaemonSets
+	daemonsets, err := clientset.AppsV1().DaemonSets("").List(context.TODO(), metav1.ListOptions{})
+	if err != nil {
+		panic(err)
+	}
+
+	for i := range daemonsets.Items {
+		// imagePullSecrets
+		imagePullSecrets := false
+		for j := range daemonsets.Items[i].Spec.Template.Spec.ImagePullSecrets {
+			if daemonsets.Items[i].Spec.Template.Spec.ImagePullSecrets[j].Name == secretName {
+				imagePullSecrets = true
+			}
+		}
+		// Volumes
+		Volumes := false
+		for j := range daemonsets.Items[i].Spec.Template.Spec.Volumes {
+			if daemonsets.Items[i].Spec.Template.Spec.Volumes[j].Secret != nil {
+				if daemonsets.Items[i].Spec.Template.Spec.Volumes[j].Secret.SecretName == secretName {
+					Volumes = true
+				}
+			}
+		}
+		// Containers using EnvFrom
+		EnvFrom := false
+		for j := range daemonsets.Items[i].Spec.Template.Spec.Containers {
+			for k := range daemonsets.Items[i].Spec.Template.Spec.Containers[j].EnvFrom {
+				if daemonsets.Items[i].Spec.Template.Spec.Containers[j].EnvFrom[k].SecretRef.Name == secretName {
+					EnvFrom = true
+				}
+			}
+		}
+		// Containers using Env
+		Env := false
+		for j := range daemonsets.Items[i].Spec.Template.Spec.Containers {
+			for k := range daemonsets.Items[i].Spec.Template.Spec.Containers[j].Env {
+				if daemonsets.Items[i].Spec.Template.Spec.Containers[j].Env[k].ValueFrom != nil && daemonsets.Items[i].Spec.Template.Spec.Containers[j].Env[k].ValueFrom.SecretKeyRef != nil {
+					if daemonsets.Items[i].Spec.Template.Spec.Containers[j].Env[k].ValueFrom.SecretKeyRef.Name == secretName {
+						Env = true
+					}
+				}
+			}
+		}
+		// initContainers using EnvFrom
+		initEnvFrom := false
+		for j := range daemonsets.Items[i].Spec.Template.Spec.InitContainers {
+			for k := range daemonsets.Items[i].Spec.Template.Spec.InitContainers[j].EnvFrom {
+				if daemonsets.Items[i].Spec.Template.Spec.InitContainers[j].EnvFrom[k].SecretRef.Name == secretName {
+					initEnvFrom = true
+				}
+			}
+		}
+		// initContainers using Env
+		initEnv := false
+		for j := range daemonsets.Items[i].Spec.Template.Spec.InitContainers {
+			for k := range daemonsets.Items[i].Spec.Template.Spec.InitContainers[j].Env {
+				if daemonsets.Items[i].Spec.Template.Spec.InitContainers[j].Env[k].ValueFrom.SecretKeyRef != nil {
+					if daemonsets.Items[i].Spec.Template.Spec.InitContainers[j].Env[k].ValueFrom.SecretKeyRef.Name == secretName {
 						initEnv = true
 					}
 				}
