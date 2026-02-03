@@ -4,314 +4,179 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"log"
 	"path/filepath"
 
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/homedir"
 )
 
+// SecretRef uniquely identifies a Secret by Namespace and Name.
+type SecretRef struct {
+	Name      string
+	Namespace string
+}
+
+// String return the Secret reference in "Namespace/Name" format.
+func (s SecretRef) String() string {
+	return fmt.Sprintf("%s/%s", s.Namespace, s.Name)
+}
+
 func main() {
-	// Kubernetes client configuration
-	clientset := kubernetesClientAuth()
+	clientset, err := newKubernetesClient()
+	if err != nil {
+		log.Fatalf("Failed to create Kubernetes client: %v", err)
+	}
 
-	// List Namespaces
-	namespaces := listNamespaces(clientset)
+	secrets, err := listAllSecrets(clientset)
+	if err != nil {
+		log.Fatalf("Failed to list Secrets: %v", err)
+	}
 
-	// Extract Secrets
-	secretList := listSecrets(clientset, namespaces)
+	usedSecrets, err := findUsedSecrets(clientset)
+	if err != nil {
+		log.Fatalf("Failed to find used Secrets: %v", err)
+	}
 
-	// Identify used Secrets (imagePullSecrets, Volumes, Containers and initContainers)
-	for _, i := range secretList {
-		if !secretDeployments(clientset, i) && !secretStateFulsets(clientset, i) && !secretDaemonSets(clientset, i) {
-			fmt.Printf("Secret %s is unused.\n", i)
+	for _, secret := range secrets {
+		if !usedSecrets[secret] {
+			fmt.Printf("Secret %s is unused.\n", secret)
 		}
 	}
 }
 
-func kubernetesClientAuth() *kubernetes.Clientset {
-	var kubeconfig *string
+// newKubernetesClient creates a Kubernetes clientset from kubeconfig file.
+func newKubernetesClient() (*kubernetes.Clientset, error) {
+	var kubeconfig string
 	if home := homedir.HomeDir(); home != "" {
-		kubeconfig = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
+		kubeconfig = *flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
 	} else {
-		kubeconfig = flag.String("kubeconfig", "", "absolute path to the kubeconfig file")
+		kubeconfig = *flag.String("kubeconfig", "", "absolute path to the kubeconfig file")
 	}
 	flag.Parse()
 
-	config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
+	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
 	if err != nil {
-		panic(err)
+		return nil, fmt.Errorf("building config: %w", err)
 	}
 
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		panic(err)
+		return nil, fmt.Errorf("creating clientset: %w", err)
 	}
 
-	return clientset
+	return clientset, nil
 }
 
-func listNamespaces(clientset *kubernetes.Clientset) []string {
-	namespaceClient, err := clientset.CoreV1().Namespaces().List(context.TODO(), metav1.ListOptions{})
+// listAllSecrets returns all Secrets across all Namespaces.
+func listAllSecrets(clientset *kubernetes.Clientset) ([]SecretRef, error) {
+	secrets, err := clientset.CoreV1().Secrets("").List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
-		panic(err)
+		return nil, fmt.Errorf("listing secrets: %w", err)
 	}
 
-	namespaceList := []string{}
-	for i := range len(namespaceClient.Items) {
-		namespaceList = append(namespaceList, namespaceClient.Items[i].Name)
+	result := make([]SecretRef, 0, len(secrets.Items))
+	for _, secret := range secrets.Items {
+		result = append(result, SecretRef{
+			Name:      secret.Name,
+			Namespace: secret.Namespace,
+		})
 	}
 
-	return namespaceList
+	return result, nil
 }
 
-func listSecrets(clientset *kubernetes.Clientset, namespaces []string) []string {
-	secretList := []string{}
+// findUsedSecrets scans all workloads and returns Secrets that are referenced.
+func findUsedSecrets(clientset *kubernetes.Clientset) (map[SecretRef]bool, error) {
+	usedSecrets := make(map[SecretRef]bool)
 
-	for i := range len(namespaces) {
-		secretClient, err := clientset.CoreV1().Secrets(namespaces[i]).List(context.TODO(), metav1.ListOptions{})
-		if err != nil {
-			panic(err)
-		}
-		for y := range len(secretClient.Items) {
-			secretList = append(secretList, secretClient.Items[y].Name)
-		}
-	}
-
-	return secretList
-}
-
-func secretDeployments(clientset *kubernetes.Clientset, secretName string) bool {
-	var isUsed bool
-
-	// Extract Deployments
 	deployments, err := clientset.AppsV1().Deployments("").List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
-		panic(err)
+		return nil, fmt.Errorf("listing deployments: %w", err)
+	}
+	for _, deploy := range deployments.Items {
+		extractSecretsFromPodSpec(&deploy.Spec.Template.Spec, deploy.Namespace, usedSecrets)
 	}
 
-	for i := range deployments.Items {
-		// imagePullSecrets
-		imagePullSecrets := false
-		for j := range deployments.Items[i].Spec.Template.Spec.ImagePullSecrets {
-			if deployments.Items[i].Spec.Template.Spec.ImagePullSecrets[j].Name == secretName {
-				imagePullSecrets = true
-			}
-		}
-		// Volumes
-		Volumes := false
-		for j := range deployments.Items[i].Spec.Template.Spec.Volumes {
-			if deployments.Items[i].Spec.Template.Spec.Volumes[j].Secret != nil {
-				if deployments.Items[i].Spec.Template.Spec.Volumes[j].Secret.SecretName == secretName {
-					Volumes = true
-				}
-			}
-		}
-		// Containers using EnvFrom
-		EnvFrom := false
-		for j := range deployments.Items[i].Spec.Template.Spec.Containers {
-			for k := range deployments.Items[i].Spec.Template.Spec.Containers[j].EnvFrom {
-				if deployments.Items[i].Spec.Template.Spec.Containers[j].EnvFrom[k].SecretRef.Name == secretName {
-					EnvFrom = true
-				}
-			}
-		}
-		// Containers using Env
-		Env := false
-		for j := range deployments.Items[i].Spec.Template.Spec.Containers {
-			for k := range deployments.Items[i].Spec.Template.Spec.Containers[j].Env {
-				if deployments.Items[i].Spec.Template.Spec.Containers[j].Env[k].ValueFrom.SecretKeyRef != nil {
-					if deployments.Items[i].Spec.Template.Spec.Containers[j].Env[k].ValueFrom.SecretKeyRef.Name == secretName {
-						Env = true
-					}
-				}
-			}
-		}
-		// initContainers using EnvFrom
-		initEnvFrom := false
-		for j := range deployments.Items[i].Spec.Template.Spec.InitContainers {
-			for k := range deployments.Items[i].Spec.Template.Spec.InitContainers[j].EnvFrom {
-				if deployments.Items[i].Spec.Template.Spec.InitContainers[j].EnvFrom[k].SecretRef.Name == secretName {
-					initEnvFrom = true
-				}
-			}
-		}
-		// initContainers using Env
-		initEnv := false
-		for j := range deployments.Items[i].Spec.Template.Spec.InitContainers {
-			for k := range deployments.Items[i].Spec.Template.Spec.InitContainers[j].Env {
-				if deployments.Items[i].Spec.Template.Spec.InitContainers[j].Env[k].ValueFrom.SecretKeyRef != nil {
-					if deployments.Items[i].Spec.Template.Spec.InitContainers[j].Env[k].ValueFrom.SecretKeyRef.Name == secretName {
-						initEnv = true
-					}
-				}
-			}
-		}
-
-		// Determine Secret usage
-		if imagePullSecrets || Volumes || EnvFrom || Env || initEnvFrom || initEnv {
-			isUsed = true
-		} else {
-			isUsed = false
-		}
-	}
-
-	return isUsed
-}
-
-func secretStateFulsets(clientset *kubernetes.Clientset, secretName string) bool {
-	var isUsed bool
-
-	// Extract StatefulSet
 	statefulsets, err := clientset.AppsV1().StatefulSets("").List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
-		panic(err)
+		return nil, fmt.Errorf("listing statefulsets: %w", err)
+	}
+	for _, sts := range statefulsets.Items {
+		extractSecretsFromPodSpec(&sts.Spec.Template.Spec, sts.Namespace, usedSecrets)
 	}
 
-	for i := range statefulsets.Items {
-		// imagePullSecrets
-		imagePullSecrets := false
-		for j := range statefulsets.Items[i].Spec.Template.Spec.ImagePullSecrets {
-			if statefulsets.Items[i].Spec.Template.Spec.ImagePullSecrets[j].Name == secretName {
-				imagePullSecrets = true
-			}
-		}
-		// Volumes
-		Volumes := false
-		for j := range statefulsets.Items[i].Spec.Template.Spec.Volumes {
-			if statefulsets.Items[i].Spec.Template.Spec.Volumes[j].Secret != nil {
-				if statefulsets.Items[i].Spec.Template.Spec.Volumes[j].Secret.SecretName == secretName {
-					Volumes = true
-				}
-			}
-		}
-		// Containers using EnvFrom
-		EnvFrom := false
-		for j := range statefulsets.Items[i].Spec.Template.Spec.Containers {
-			for k := range statefulsets.Items[i].Spec.Template.Spec.Containers[j].EnvFrom {
-				if statefulsets.Items[i].Spec.Template.Spec.Containers[j].EnvFrom[k].SecretRef.Name == secretName {
-					EnvFrom = true
-				}
-			}
-		}
-		// Containers using Env
-		Env := false
-		for j := range statefulsets.Items[i].Spec.Template.Spec.Containers {
-			for k := range statefulsets.Items[i].Spec.Template.Spec.Containers[j].Env {
-				if statefulsets.Items[i].Spec.Template.Spec.Containers[j].Env[k].ValueFrom.SecretKeyRef != nil {
-					if statefulsets.Items[i].Spec.Template.Spec.Containers[j].Env[k].ValueFrom.SecretKeyRef.Name == secretName {
-						Env = true
-					}
-				}
-			}
-		}
-		// initContainers using EnvFrom
-		initEnvFrom := false
-		for j := range statefulsets.Items[i].Spec.Template.Spec.InitContainers {
-			for k := range statefulsets.Items[i].Spec.Template.Spec.InitContainers[j].EnvFrom {
-				if statefulsets.Items[i].Spec.Template.Spec.InitContainers[j].EnvFrom[k].SecretRef.Name == secretName {
-					initEnvFrom = true
-				}
-			}
-		}
-		// initContainers using Env
-		initEnv := false
-		for j := range statefulsets.Items[i].Spec.Template.Spec.InitContainers {
-			for k := range statefulsets.Items[i].Spec.Template.Spec.InitContainers[j].Env {
-				if statefulsets.Items[i].Spec.Template.Spec.InitContainers[j].Env[k].ValueFrom.SecretKeyRef != nil {
-					if statefulsets.Items[i].Spec.Template.Spec.InitContainers[j].Env[k].ValueFrom.SecretKeyRef.Name == secretName {
-						initEnv = true
-					}
-				}
-			}
-		}
-
-		// Determine Secret usage
-		if imagePullSecrets || Volumes || EnvFrom || Env || initEnvFrom || initEnv {
-			isUsed = true
-		} else {
-			isUsed = false
-		}
-	}
-
-	return isUsed
-}
-
-func secretDaemonSets(clientset *kubernetes.Clientset, secretName string) bool {
-	var isUsed bool
-
-	// Extract DaemonSets
 	daemonsets, err := clientset.AppsV1().DaemonSets("").List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
-		panic(err)
+		return nil, fmt.Errorf("listing daemonsets: %w", err)
+	}
+	for _, ds := range daemonsets.Items {
+		extractSecretsFromPodSpec(&ds.Spec.Template.Spec, ds.Namespace, usedSecrets)
 	}
 
-	for i := range daemonsets.Items {
-		// imagePullSecrets
-		imagePullSecrets := false
-		for j := range daemonsets.Items[i].Spec.Template.Spec.ImagePullSecrets {
-			if daemonsets.Items[i].Spec.Template.Spec.ImagePullSecrets[j].Name == secretName {
-				imagePullSecrets = true
-			}
-		}
-		// Volumes
-		Volumes := false
-		for j := range daemonsets.Items[i].Spec.Template.Spec.Volumes {
-			if daemonsets.Items[i].Spec.Template.Spec.Volumes[j].Secret != nil {
-				if daemonsets.Items[i].Spec.Template.Spec.Volumes[j].Secret.SecretName == secretName {
-					Volumes = true
-				}
-			}
-		}
-		// Containers using EnvFrom
-		EnvFrom := false
-		for j := range daemonsets.Items[i].Spec.Template.Spec.Containers {
-			for k := range daemonsets.Items[i].Spec.Template.Spec.Containers[j].EnvFrom {
-				if daemonsets.Items[i].Spec.Template.Spec.Containers[j].EnvFrom[k].SecretRef.Name == secretName {
-					EnvFrom = true
-				}
-			}
-		}
-		// Containers using Env
-		Env := false
-		for j := range daemonsets.Items[i].Spec.Template.Spec.Containers {
-			for k := range daemonsets.Items[i].Spec.Template.Spec.Containers[j].Env {
-				if daemonsets.Items[i].Spec.Template.Spec.Containers[j].Env[k].ValueFrom != nil && daemonsets.Items[i].Spec.Template.Spec.Containers[j].Env[k].ValueFrom.SecretKeyRef != nil {
-					if daemonsets.Items[i].Spec.Template.Spec.Containers[j].Env[k].ValueFrom.SecretKeyRef.Name == secretName {
-						Env = true
-					}
-				}
-			}
-		}
-		// initContainers using EnvFrom
-		initEnvFrom := false
-		for j := range daemonsets.Items[i].Spec.Template.Spec.InitContainers {
-			for k := range daemonsets.Items[i].Spec.Template.Spec.InitContainers[j].EnvFrom {
-				if daemonsets.Items[i].Spec.Template.Spec.InitContainers[j].EnvFrom[k].SecretRef.Name == secretName {
-					initEnvFrom = true
-				}
-			}
-		}
-		// initContainers using Env
-		initEnv := false
-		for j := range daemonsets.Items[i].Spec.Template.Spec.InitContainers {
-			for k := range daemonsets.Items[i].Spec.Template.Spec.InitContainers[j].Env {
-				if daemonsets.Items[i].Spec.Template.Spec.InitContainers[j].Env[k].ValueFrom.SecretKeyRef != nil {
-					if daemonsets.Items[i].Spec.Template.Spec.InitContainers[j].Env[k].ValueFrom.SecretKeyRef.Name == secretName {
-						initEnv = true
-					}
-				}
-			}
-		}
+	jobs, err := clientset.BatchV1().Jobs("").List(context.TODO(), metav1.ListOptions{})
+	if err != nil {
+		return nil, fmt.Errorf("listing jobs: %w", err)
+	}
+	for _, job := range jobs.Items {
+		extractSecretsFromPodSpec(&job.Spec.Template.Spec, job.Namespace, usedSecrets)
+	}
 
-		// Determine Secret usage
-		if imagePullSecrets || Volumes || EnvFrom || Env || initEnvFrom || initEnv {
-			isUsed = true
-		} else {
-			isUsed = false
+	cronjobs, err := clientset.BatchV1().CronJobs("").List(context.TODO(), metav1.ListOptions{})
+	if err != nil {
+		return nil, fmt.Errorf("listing cronjobs: %w", err)
+	}
+	for _, cj := range cronjobs.Items {
+		extractSecretsFromPodSpec(&cj.Spec.JobTemplate.Spec.Template.Spec, cj.Namespace, usedSecrets)
+	}
+
+	ingresses, err := clientset.NetworkingV1().Ingresses("").List(context.TODO(), metav1.ListOptions{})
+	if err != nil {
+		return nil, fmt.Errorf("listing ingresses: %w", err)
+	}
+	for _, ing := range ingresses.Items {
+		for _, tls := range ing.Spec.TLS {
+			if tls.SecretName != "" {
+				usedSecrets[SecretRef{Name: tls.SecretName, Namespace: ing.Namespace}] = true
+			}
 		}
 	}
 
-	return isUsed
+	return usedSecrets, nil
+}
+
+// extractSecretsFromPodSpec extracts all Secret references from a PodSpec.
+func extractSecretsFromPodSpec(spec *corev1.PodSpec, namespace string, usedSecrets map[SecretRef]bool) {
+	for _, ips := range spec.ImagePullSecrets {
+		usedSecrets[SecretRef{Name: ips.Name, Namespace: namespace}] = true
+	}
+
+	for _, vol := range spec.Volumes {
+		if vol.Secret != nil {
+			usedSecrets[SecretRef{Name: vol.Secret.SecretName, Namespace: namespace}] = true
+		}
+	}
+
+	allContainers := append(spec.Containers, spec.InitContainers...)
+	for _, container := range allContainers {
+		extractSecretsFromContainer(&container, namespace, usedSecrets)
+	}
+}
+
+// extractSecretsFromContainer extracts Secret references from a container's environment configuration.
+func extractSecretsFromContainer(container *corev1.Container, namespace string, usedSecrets map[SecretRef]bool) {
+	for _, envFrom := range container.EnvFrom {
+		if envFrom.SecretRef != nil {
+			usedSecrets[SecretRef{Name: envFrom.SecretRef.Name, Namespace: namespace}] = true
+		}
+	}
+
+	for _, env := range container.Env {
+		if env.ValueFrom != nil && env.ValueFrom.SecretKeyRef != nil {
+			usedSecrets[SecretRef{Name: env.ValueFrom.SecretKeyRef.Name, Namespace: namespace}] = true
+		}
+	}
 }
