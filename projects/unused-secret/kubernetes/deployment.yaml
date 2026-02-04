@@ -1,0 +1,57 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: test
+  name: test
+  namespace: test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: test
+  template:
+    metadata:
+      labels:
+        app: test
+    spec:
+      imagePullSecrets:
+      - name: regcred
+      initContainers:
+      - image: busybox
+        name: init
+        command: ["echo"]
+        args: ["test"]
+        env:
+        - name: test
+          valueFrom:
+            secretKeyRef:
+              name: test
+              key: foo
+      containers:
+      - image: busybox
+        name: one
+        command: ["sleep"]
+        args: ["infinity"]
+        envFrom:
+        - secretRef:
+            name: test
+      - image: busybox
+        name: two
+        command: ["sleep"]
+        args: ["infinity"]
+        env:
+        - name: test
+          valueFrom:
+            secretKeyRef:
+              name: test
+              key: foo
+        volumeMounts:
+        - name: foo
+          mountPath: "/etc/secret"
+          readOnly: true
+      volumes:
+      - name: foo
+        secret:
+          secretName: test
