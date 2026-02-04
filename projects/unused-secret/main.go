@@ -60,12 +60,12 @@ func newKubernetesClient() (*kubernetes.Clientset, error) {
 
 	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
 	if err != nil {
-		return nil, fmt.Errorf("building config: %w", err)
+		return nil, fmt.Errorf("Building config: %w", err)
 	}
 
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		return nil, fmt.Errorf("creating clientset: %w", err)
+		return nil, fmt.Errorf("Creating clientset: %w", err)
 	}
 
 	return clientset, nil
@@ -75,7 +75,7 @@ func newKubernetesClient() (*kubernetes.Clientset, error) {
 func listAllSecrets(clientset *kubernetes.Clientset) ([]SecretRef, error) {
 	secrets, err := clientset.CoreV1().Secrets("").List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
-		return nil, fmt.Errorf("listing secrets: %w", err)
+		return nil, fmt.Errorf("Listing Secrets: %w", err)
 	}
 
 	result := make([]SecretRef, 0, len(secrets.Items))
@@ -93,54 +93,54 @@ func listAllSecrets(clientset *kubernetes.Clientset) ([]SecretRef, error) {
 func findUsedSecrets(clientset *kubernetes.Clientset) (map[SecretRef]bool, error) {
 	usedSecrets := make(map[SecretRef]bool)
 
-	deployments, err := clientset.AppsV1().Deployments("").List(context.TODO(), metav1.ListOptions{})
+	allDeployments, err := clientset.AppsV1().Deployments("").List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
-		return nil, fmt.Errorf("listing deployments: %w", err)
+		return nil, fmt.Errorf("Listing Deployments: %w", err)
 	}
-	for _, deploy := range deployments.Items {
-		extractSecretsFromPodSpec(&deploy.Spec.Template.Spec, deploy.Namespace, usedSecrets)
+	for _, deployment := range allDeployments.Items {
+		extractSecretsFromPodSpec(&deployment.Spec.Template.Spec, deployment.Namespace, usedSecrets)
 	}
 
-	statefulsets, err := clientset.AppsV1().StatefulSets("").List(context.TODO(), metav1.ListOptions{})
+	allStatefulSets, err := clientset.AppsV1().StatefulSets("").List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
-		return nil, fmt.Errorf("listing statefulsets: %w", err)
+		return nil, fmt.Errorf("Listing StatefulSets: %w", err)
 	}
-	for _, sts := range statefulsets.Items {
-		extractSecretsFromPodSpec(&sts.Spec.Template.Spec, sts.Namespace, usedSecrets)
+	for _, statefulset := range allStatefulSets.Items {
+		extractSecretsFromPodSpec(&statefulset.Spec.Template.Spec, statefulset.Namespace, usedSecrets)
 	}
 
-	daemonsets, err := clientset.AppsV1().DaemonSets("").List(context.TODO(), metav1.ListOptions{})
+	allDaemonSets, err := clientset.AppsV1().DaemonSets("").List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
-		return nil, fmt.Errorf("listing daemonsets: %w", err)
+		return nil, fmt.Errorf("Listing DaemonSets: %w", err)
 	}
-	for _, ds := range daemonsets.Items {
-		extractSecretsFromPodSpec(&ds.Spec.Template.Spec, ds.Namespace, usedSecrets)
+	for _, daemonset := range allDaemonSets.Items {
+		extractSecretsFromPodSpec(&daemonset.Spec.Template.Spec, daemonset.Namespace, usedSecrets)
 	}
 
-	jobs, err := clientset.BatchV1().Jobs("").List(context.TODO(), metav1.ListOptions{})
+	allJobs, err := clientset.BatchV1().Jobs("").List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
-		return nil, fmt.Errorf("listing jobs: %w", err)
+		return nil, fmt.Errorf("Listing Jobs: %w", err)
 	}
-	for _, job := range jobs.Items {
+	for _, job := range allJobs.Items {
 		extractSecretsFromPodSpec(&job.Spec.Template.Spec, job.Namespace, usedSecrets)
 	}
 
-	cronjobs, err := clientset.BatchV1().CronJobs("").List(context.TODO(), metav1.ListOptions{})
+	allCronJobs, err := clientset.BatchV1().CronJobs("").List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
-		return nil, fmt.Errorf("listing cronjobs: %w", err)
+		return nil, fmt.Errorf("Listing CronJobs: %w", err)
 	}
-	for _, cj := range cronjobs.Items {
-		extractSecretsFromPodSpec(&cj.Spec.JobTemplate.Spec.Template.Spec, cj.Namespace, usedSecrets)
+	for _, cronjob := range allCronJobs.Items {
+		extractSecretsFromPodSpec(&cronjob.Spec.JobTemplate.Spec.Template.Spec, cronjob.Namespace, usedSecrets)
 	}
 
-	ingresses, err := clientset.NetworkingV1().Ingresses("").List(context.TODO(), metav1.ListOptions{})
+	allIngresses, err := clientset.NetworkingV1().Ingresses("").List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
-		return nil, fmt.Errorf("listing ingresses: %w", err)
+		return nil, fmt.Errorf("Listing Ingresses: %w", err)
 	}
-	for _, ing := range ingresses.Items {
-		for _, tls := range ing.Spec.TLS {
+	for _, ingress := range allIngresses.Items {
+		for _, tls := range ingress.Spec.TLS {
 			if tls.SecretName != "" {
-				usedSecrets[SecretRef{Name: tls.SecretName, Namespace: ing.Namespace}] = true
+				usedSecrets[SecretRef{Name: tls.SecretName, Namespace: ingress.Namespace}] = true
 			}
 		}
 	}
@@ -150,13 +150,13 @@ func findUsedSecrets(clientset *kubernetes.Clientset) (map[SecretRef]bool, error
 
 // extractSecretsFromPodSpec extracts all Secret references from a PodSpec.
 func extractSecretsFromPodSpec(spec *corev1.PodSpec, namespace string, usedSecrets map[SecretRef]bool) {
-	for _, ips := range spec.ImagePullSecrets {
-		usedSecrets[SecretRef{Name: ips.Name, Namespace: namespace}] = true
+	for _, imagepullsecret := range spec.ImagePullSecrets {
+		usedSecrets[SecretRef{Name: imagepullsecret.Name, Namespace: namespace}] = true
 	}
 
-	for _, vol := range spec.Volumes {
-		if vol.Secret != nil {
-			usedSecrets[SecretRef{Name: vol.Secret.SecretName, Namespace: namespace}] = true
+	for _, volume := range spec.Volumes {
+		if volume.Secret != nil {
+			usedSecrets[SecretRef{Name: volume.Secret.SecretName, Namespace: namespace}] = true
 		}
 	}
 
