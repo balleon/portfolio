@@ -43,7 +43,7 @@ I am targeting roles as:
 |---|---|
 | **DevOps** | [Argo CD GitOps](./projects/devops/argo-cd/), [GitHub Runner Kubernetes](./projects/devops/github-runner-kubernetes/) |
 | **DevSecOps** | [Kyverno Policies](./projects/devsecops/kyverno-policies/) |
-| **Golang** | [Go HTTP Server Kubernetes](./projects/golang/http-server-kubernetes/), [Go Kubernetes Client](./projects/golang/go-kubernetes/), [Unused Secret Detector](./projects/golang/unused-secret/) |
+| **Golang** | [HTTP Server Kubernetes](./projects/golang/http-server-kubernetes/), [Kubernetes API Server IP](./projects/golang/kubernetes-api-server-ip/), [Unused Secret Detector](./projects/golang/unused-secret/) |
 | **Infrastructure as Code** | [Terraform Module: Ingress NGINX](./projects/iac/terraform-modules/ingress-nginx/) |
 | **Kubernetes** | [Amazon EKS Cluster](./projects/kubernetes/eks/), [k3d Cluster Setup](./projects/kubernetes/k3d/) |
 | **Observability** | [Prometheus, Grafana, Loki Stack](./projects/observability/prometheus-grafana-loki/) |
