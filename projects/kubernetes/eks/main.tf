@@ -53,7 +53,7 @@ module "eks" {
 }
 
 module "ingress_nginx" {
-  source = "../terraform-modules/ingress-nginx/"
+  source = "../../iac/terraform-modules/ingress-nginx/"
 
   values = [
     <<-EOT
