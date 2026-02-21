@@ -30,6 +30,7 @@ I am targeting roles as:
 | [GitHub Runner on Kubernetes](./projects/devops/github-runner-kubernetes/) | Enables scalable self-hosted CI execution on Kubernetes for delivery pipelines. | Terraform, GitHub Actions Runner Controller, Helm, Kubernetes |
 | [Kubernetes Policy Enforcement](./projects/devsecops/kyverno-policies/) | Enforces security and governance guardrails with Kubernetes-native policy-as-code. | Kyverno, Kubernetes |
 | [HTTP Server on Kubernetes (Go)](./projects/golang/http-server-kubernetes/) | Deploys a containerized Go service with production-style Kubernetes networking. | Go, Docker, Kubernetes, Ingress |
+| [Kubernetes Operator (Go)](./projects/golang/kubernetes-operator/) | Extends Kubernetes with a custom controller to reconcile application resources declaratively. | Go, Kubebuilder, controller-runtime, Kubernetes |
 | [Unused Secret Detector (Go)](./projects/golang/unused-secret/) | Improves cluster security posture by detecting and reporting unused Kubernetes Secrets. | Go, client-go, Kubernetes API |
 | [Terraform Module: Ingress NGINX](./projects/iac/terraform-modules/ingress-nginx/) | Standardizes ingress provisioning with a reusable Terraform module pattern. | Terraform, Helm, Kubernetes |
 | [AWS EKS with Terraform](./projects/kubernetes/eks/) | Provisions an AWS EKS platform foundation using infrastructure as code. | Terraform, AWS EKS, Helm, NGINX Ingress |
@@ -43,7 +44,7 @@ I am targeting roles as:
 |---|---|
 | **DevOps** | [Argo CD GitOps](./projects/devops/argo-cd/), [GitHub Runner Kubernetes](./projects/devops/github-runner-kubernetes/) |
 | **DevSecOps** | [Kyverno Policies](./projects/devsecops/kyverno-policies/) |
-| **Golang** | [HTTP Server Kubernetes](./projects/golang/http-server-kubernetes/), [Kubernetes API Server IP](./projects/golang/kubernetes-api-server-ip/), [Unused Secret Detector](./projects/golang/unused-secret/) |
+| **Golang** | [HTTP Server Kubernetes](./projects/golang/http-server-kubernetes/), [Kubernetes API Server IP](./projects/golang/kubernetes-api-server-ip/), [Kubernetes Operator](./projects/golang/kubernetes-operator/), [Unused Secret Detector](./projects/golang/unused-secret/) |
 | **Infrastructure as Code** | [Terraform Module: Ingress NGINX](./projects/iac/terraform-modules/ingress-nginx/) |
 | **Kubernetes** | [Amazon EKS Cluster](./projects/kubernetes/eks/), [k3d Cluster Setup](./projects/kubernetes/k3d/) |
 | **Observability** | [Prometheus, Grafana, Loki Stack](./projects/observability/prometheus-grafana-loki/) |
