@@ -1,4 +1,4 @@
-# go-kubernetes-api-server-ip
+# kubernetes-api-server-ip
 
 This project uses `client-go` to connect to a Kubernetes cluster and print the IP address of the Kubernetes API Server.
 
