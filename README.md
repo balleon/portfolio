@@ -34,6 +34,7 @@ I am targeting roles as:
 | [Unused Secret Detector (Go)](./projects/golang/unused-secret/) | Improves cluster security posture by detecting and reporting unused Kubernetes Secrets. | Go, client-go, Kubernetes API |
 | [Terraform Module: Ingress NGINX](./projects/iac/terraform-modules/ingress-nginx/) | Standardizes ingress provisioning with a reusable Terraform module pattern. | Terraform, Helm, Kubernetes |
 | [AWS EKS with Terraform](./projects/kubernetes/eks/) | Provisions an AWS EKS platform foundation using infrastructure as code. | Terraform, AWS EKS, Helm, NGINX Ingress |
+| [Gateway API with Traefik](./projects/kubernetes/gateway-api/) | Exposes Kubernetes services through Gateway API resources managed by a Traefik controller. | Kubernetes Gateway API, Traefik, NGINX |
 | [Monitoring & Observability](./projects/observability/prometheus-grafana-loki/) | Implements a full observability stack for metrics, logs, dashboards, and alerting. | Prometheus, Alertmanager, Grafana, Loki, Promtail, Terraform |
 
 ---
@@ -46,7 +47,7 @@ I am targeting roles as:
 | **DevSecOps** | [Kyverno Policies](./projects/devsecops/kyverno-policies/) |
 | **Golang** | [HTTP Server Kubernetes](./projects/golang/http-server-kubernetes/), [Kubernetes API Server IP](./projects/golang/kubernetes-api-server-ip/), [Kubernetes Operator](./projects/golang/kubernetes-operator/), [Unused Secret Detector](./projects/golang/unused-secret/) |
 | **Infrastructure as Code** | [Terraform Module: Ingress NGINX](./projects/iac/terraform-modules/ingress-nginx/) |
-| **Kubernetes** | [Amazon EKS Cluster](./projects/kubernetes/eks/), [k3d Cluster Setup](./projects/kubernetes/k3d/) |
+| **Kubernetes** | [Amazon EKS Cluster](./projects/kubernetes/eks/), [Gateway API with Traefik](./projects/kubernetes/gateway-api/), [k3d Cluster Setup](./projects/kubernetes/k3d/) |
 | **Observability** | [Prometheus, Grafana, Loki Stack](./projects/observability/prometheus-grafana-loki/) |
 
 ---
