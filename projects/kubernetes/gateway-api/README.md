@@ -22,58 +22,15 @@ helm install traefik traefik/traefik \
 --set ports.websecure.port=443 \
 --set ports.websecure.protocol=TCP
 
-kubectl create deployment nginx --namespace=default --port=80 --image=nginx
-kubectl expose deployment nginx --namespace=default --port=80 --target-port=80
+kubectl apply --filename=./manifests/nginx/{namespace.yaml,deployment.yaml,service.yaml}
 
-kubectl apply --filename - <<EOF
-apiVersion: gateway.networking.k8s.io/v1
-kind: GatewayClass
-metadata:
-  name: traefik
-spec:
-  controllerName: traefik.io/gateway-controller
----
-apiVersion: gateway.networking.k8s.io/v1
-kind: Gateway
-metadata:
-  name: gateway-api
-  namespace: default
-spec:
-  gatewayClassName: traefik
-  listeners:
-    - name: http
-      protocol: HTTP
-      port: 80
-      allowedRoutes:
-        namespaces:
-          from: All
----
-apiVersion: gateway.networking.k8s.io/v1
-kind: HTTPRoute
-metadata:
-  name: nginx-route
-  namespace: default
-spec:
-  parentRefs:
-  - name: gateway-api
-    sectionName: http
-    kind: Gateway
-  hostnames:
-  - <REDACTED>.nip.io
-  rules:
-  - matches:
-    - path: 
-        type: PathPrefix
-        value: /nginx
-    filters:
-      - type: URLRewrite
-        urlRewrite:
-          path:
-            replacePrefixMatch: /
-            type: ReplacePrefixMatch
-    backendRefs:
-    - name: nginx
-      port: 80
-EOF
+# https://gateway-api.sigs.k8s.io/api-types/gatewayclass/
+kubectl apply --filename=./manifests/gateway-class.yaml
 
-curl http://<REDACTED>.nip.io/nginx
+# https://gateway-api.sigs.k8s.io/api-types/gateway/
+kubectl apply --filename=./manifests/gateway.yaml
+
+# https://gateway-api.sigs.k8s.io/api-types/httproute/
+kubectl apply --filename=./manifests/http-route.yaml
+
+curl http://<REDACTED>/nginx
