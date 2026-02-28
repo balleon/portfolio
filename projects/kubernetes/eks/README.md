@@ -29,9 +29,9 @@ export AWS_SECRET_ACCESS_KEY=<REDACTED>
 export AWS_REGION=<REDACTED>
 
 terraform init \
-    -backend-config="bucket=<REDACTED>" \
-    -backend-config="key=state/terraform.tfstate" \
-    -backend-config="region=${AWS_REGION}"
+-backend-config="bucket=<REDACTED>" \
+-backend-config="key=state/terraform.tfstate" \
+-backend-config="region=${AWS_REGION}"
 ```
 
 ### 2) Deploy infrastructure

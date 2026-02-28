@@ -24,11 +24,11 @@ helm repo add kyverno https://kyverno.github.io/kyverno/
 helm repo update
 
 helm install kyverno kyverno/kyverno \
-  --version=3.4.4 \
-  --namespace=kyverno \
-  --create-namespace \
-  --wait \
-  --wait-for-jobs
+--version=3.4.4 \
+--namespace=kyverno \
+--create-namespace \
+--wait \
+--wait-for-jobs
 ```
 
 ### 2) Apply Policies
