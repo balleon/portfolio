@@ -1,23 +1,24 @@
-# Kyverno with policy enforcement
+# Kyverno with Policy Enforcement
 
-This guide contains the Helm-based deployment of [Kyverno](https://kyverno.io/), a Kubernetes native policy engine, along with custom policies to enforce security and governance standards across your cluster. It provisions:
+## Overview
+This project deploys Kyverno and provides sample policies for baseline Kubernetes policy enforcement.
 
-- A **Helm Release** for **Kyverno** with Helm
-- Two policies are included in this setup:
-  - **Disallow Privileged Containers**: Prevents the use of privileged containers to enforce Pods security.
-  - **Require Label**: Ensures all resources have specific a label for proper organization and governance.
+## Goals
+- Install Kyverno in a dedicated namespace.
+- Enforce non-privileged container execution.
+- Enforce required labels on resources.
+
+## Repository Structure
+- `policies/disallow-privileged-containers.yaml`: blocks privileged containers.
+- `policies/require-labels.yaml`: requires label key `test`.
 
 ## Prerequisites
+- A Kubernetes cluster
+- `kubectl`
+- `helm`
 
-- Access to a Linux or Unix-like terminal
-- A Kubernetes cluster (Minikube, EKS, GKE)
-- [kubectl](https://kubernetes.io/docs/tasks/tools/)
-- [Helm](https://helm.sh/docs/intro/install/)
-
-## Installation
-
-Deploy Kyverno using Helm:
-
+## Usage
+### 1) Install Kyverno
 ```bash
 helm repo add kyverno https://kyverno.github.io/kyverno/
 helm repo update
@@ -30,40 +31,21 @@ helm install kyverno kyverno/kyverno \
 --wait-for-jobs
 ```
 
-## Test
-
-### 1. Disallow Privileged Containers
-
-Blocks the creation of Pods that run containers with the `privileged: true` setting.
-
+### 2) Apply Policies
 ```bash
 kubectl apply --filename=policies/disallow-privileged-containers.yaml
-
-kubectl run nginx --namespace=default --image=nginx --privileged=true  # return a message denying the request.
-kubectl run nginx --namespace=default --image=nginx --privileged=false # the request complies with the policy.
-
-kubectl delete pod nginx --namespace=default
-kubectl delete --filename=policies/disallow-privileged-containers.yaml
+kubectl apply --filename=policies/require-labels.yaml
 ```
 
-### 2. Require Label
-
-Ensures Pods include mandatory label key `test`:
-
+## Validation
 ```bash
-kubectl apply --filename=policies/require-labels.yaml
-
-kubectl run nginx --namespace=default --image=nginx                      # return a message denying the request.
-kubectl run nginx --namespace=default --image=nginx --labels="test=true" # request complies with the policy.
-
-kubectl delete pod nginx --namespace=default
-kubectl delete --filename=policies/require-labels.yaml
+kubectl run nginx --namespace=default --image=nginx --privileged=true
+kubectl run nginx --namespace=default --image=nginx --labels="test=true"
 ```
 
 ## Cleanup
-
-Tear down everything created in this guide:
-
 ```bash
+kubectl delete --filename=policies/disallow-privileged-containers.yaml
+kubectl delete --filename=policies/require-labels.yaml
 helm uninstall kyverno --namespace=kyverno
 ```

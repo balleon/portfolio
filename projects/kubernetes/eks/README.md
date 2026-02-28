@@ -1,35 +1,31 @@
 # Terraform Amazon EKS Cluster with Ingress NGINX Controller
 
-This repository contains Terraform code to deploy a Kubernetes environment on AWS. It provisions:
+## Overview
+This project provisions AWS networking, an Amazon EKS cluster, and the NGINX Ingress Controller using Terraform.
 
-- A **VPC** with public and private subnets
-- An **Amazon EKS Auto Mode** cluster
-- An **Helm Release** for **Ingress NGINX Controller**
+## Security Warning
+This guide includes HTTP access checks on port 80 for validation only. Use HTTPS/TLS for production endpoints, enforce redirection from HTTP to HTTPS, and avoid exposing sensitive traffic over plain HTTP.
 
-All Terraform resources are defined in a single file: `main.tf`.
+## Goals
+- Create a VPC with public and private subnets.
+- Provision EKS and configure access.
+- Deploy NGINX Ingress Controller through Helm.
 
-## Components
-
-- **Amazon VPC** (via `terraform-aws-modules/vpc`)
-- **Amazon EKS** (via `terraform-aws-modules/eks`)
-- **Helm provider** configured with EKS outputs
-- **Helm Releases** 
-    - `Ingress NGINX Controller for Kubernetes`
+## Repository Structure
+- `main.tf`: core infrastructure and Helm resources.
+- `variables.tf`: project input variables.
+- `outputs.tf`: exported values.
+- `providers.tf`, `terraform.tf`: provider and backend settings.
 
 ## Prerequisites
-
-- [Terraform](https://www.terraform.io/downloads)
-- [AWS CLI](https://aws.amazon.com/cli/)
-- [kubectl](https://kubernetes.io/docs/tasks/tools/)
-- An Amazon account with permissions to provision VPC, EKS, and Network Load Balancer
-- An Amazon S3 bucket to store Terraform state
+- AWS account with permissions for VPC/EKS/NLB
+- S3 bucket for Terraform state
+- `terraform`
+- `aws`
+- `kubectl`
 
 ## Usage
-
-### 1. Initialize Terraform
-
-Run this command to initialize Terraform and download necessary providers and modules:
-
+### 1) Initialize Terraform backend
 ```bash
 export AWS_ACCESS_KEY_ID=<REDACTED>
 export AWS_SECRET_ACCESS_KEY=<REDACTED>
@@ -41,39 +37,25 @@ terraform init \
 -backend-config="region=${AWS_REGION}"
 ```
 
-### 2. Apply Terraform
-
-To deploy the infrastructure and Kubernetes resources, run:
-
+### 2) Deploy infrastructure
 ```bash
 terraform apply
 ```
 
-### 3. Kubernetes context
-
-To configure your local kubectl to connect to the cluster, run:
-
+### 3) Configure kubeconfig
 ```bash
 aws eks update-kubeconfig --name <cluster_name>
 ```
 
-### 4. Accessing NGINX Network Load Balancer
-
-Get the Amazon Network Load Balancer address then test it:
-
+## Validation
 ```bash
 kubectl get service --namespace=ingress-nginx
-
 curl http://<nlb-address>
 curl https://<nlb-address> --insecure
 ```
 
-### 5. Cleanup
-
-To delete all resources created by Terraform:
-
+## Cleanup
 ```bash
 helm uninstall ingress-nginx --namespace=ingress-nginx
-
 terraform destroy
 ```

@@ -1,55 +1,46 @@
-# unused-secret
-
-A Kubernetes utility tool written in Go that identifies and lists unused Secrets across a cluster.
+# Unused Secret
 
 ## Overview
+This Go utility scans a Kubernetes cluster and reports secrets that are not referenced by workloads.
 
-This tool scans a Kubernetes cluster to find all Secrets that are not referenced by any workloads. It checks for Secret usage across:
+## Goals
+- Detect secrets unused by Deployments, StatefulSets, DaemonSets, Jobs, CronJobs, and Ingresses.
+- Support default or custom kubeconfig paths.
+- Provide a simple CLI workflow for cluster hygiene checks.
 
-- **Deployments** - mounted volumes and environment variables
-- **StatefulSets** - mounted volumes and environment variables
-- **DaemonSets** - mounted volumes and environment variables
-- **Jobs** - mounted volumes and environment variables
-- **CronJobs** - mounted volumes and environment variables
-- **Ingresses** - TLS certificates
-- **Pod specifications** - image pull secrets, volume mounts, and environment variable references
+## Repository Structure
+- `main.go`: unused secret detection logic.
+- `kubernetes/`: sample manifests for test scenarios.
+
+## Prerequisites
+- Go installed
+- Kubernetes access with a valid kubeconfig
+- `kubectl` (optional for sample resources)
 
 ## Usage
-
-### Prerequisites
-
-- Go 1.x or later
-- Kubernetes cluster access configured via kubeconfig
-- kubectl CLI (optional, for managing test environments)
-
-### Setup and Run
-
+### 1) (Optional) Deploy sample manifests
 ```bash
-# Deploy test Kubernetes resources
-kubectl apply -f ./kubernetes/
+kubectl apply --filename=./kubernetes/
+```
 
-# Initialize Go module dependencies
+### 2) Run the scanner
+```bash
 go mod tidy
-
-# Run the utility (uses default kubeconfig at ~/.kube/config)
 go run main.go
+```
 
-# Or specify a custom kubeconfig
+### 3) Run with a custom kubeconfig
+```bash
 go run main.go -kubeconfig=/path/to/kubeconfig
 ```
 
-## Output
-
-The tool prints each unused Secret in the format:
-```
+## Validation
+Expected output format:
+```text
 Secret namespace/secret-name is unused.
 ```
 
-## Kubernetes Manifests
-
-The `kubernetes/` directory contains sample manifests for testing:
-- `namespace.yaml` - Test namespace
-- `secrets.yaml` - Test Secrets
-- `deployment.yaml` - Test Deployment using a Secret
-- `statefulset.yaml` - Test StatefulSet
-- `daemonset.yaml` - Test DaemonSet
+## Cleanup
+```bash
+kubectl delete --filename=./kubernetes/
+```
