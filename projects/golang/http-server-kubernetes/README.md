@@ -3,6 +3,9 @@
 ## Overview
 This project exposes an HTTP endpoint (`/version`) returning Kubernetes server version information from a Go application deployed to Kubernetes.
 
+## Security Warning
+This example uses HTTP for demonstration and testing. HTTP traffic is unencrypted and should not be used for sensitive or production workloads. Prefer HTTPS with TLS termination and enforced redirects.
+
 ## Goals
 - Build and lint a Go HTTP service.
 - Package the application as a container image.

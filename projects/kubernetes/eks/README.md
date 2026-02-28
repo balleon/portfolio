@@ -3,6 +3,9 @@
 ## Overview
 This project provisions AWS networking, an Amazon EKS cluster, and the NGINX Ingress Controller using Terraform.
 
+## Security Warning
+This guide includes HTTP access checks on port 80 for validation only. Use HTTPS/TLS for production endpoints, enforce redirection from HTTP to HTTPS, and avoid exposing sensitive traffic over plain HTTP.
+
 ## Goals
 - Create a VPC with public and private subnets.
 - Provision EKS and configure access.

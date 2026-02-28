@@ -3,6 +3,9 @@
 ## Overview
 This project deploys NGINX and exposes it through Kubernetes Gateway API resources managed by Traefik.
 
+## Security Warning
+This setup exposes traffic over HTTP on port 80 for example purposes. Plain HTTP is not encrypted; use HTTPS/TLS in production and enforce HTTP-to-HTTPS redirects.
+
 ## Goals
 - Install Traefik with Kubernetes Gateway provider enabled.
 - Deploy NGINX application resources.

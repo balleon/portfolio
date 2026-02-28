@@ -3,6 +3,9 @@
 ## Overview
 This project creates a local Kubernetes cluster with k3d, installs NGINX Ingress Controller, and exposes an NGINX workload through Ingress.
 
+## Security Warning
+This walkthrough uses HTTP and port 80 for local validation. Do not rely on plain HTTP for production traffic; enable TLS, serve over HTTPS, and enforce secure redirects.
+
 ## Goals
 - Create a local k3d cluster with Traefik disabled.
 - Install NGINX Ingress Controller using Helm.
