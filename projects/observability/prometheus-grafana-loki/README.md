@@ -1,66 +1,45 @@
-# Monitoring and observability with Prometheus, Grafana and Loki
+# Monitoring and Observability with Prometheus, Grafana, and Loki
 
-This guide shows how to deploy and use `Monitoring` and `Observability` tools.
+## Overview
+This project deploys a Kubernetes observability stack using Terraform and Helm: kube-prometheus-stack, Loki, and Promtail.
 
-This Terraform configuration deploys the [Kube-Prometheus-Stack](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack), [Loki](https://github.com/grafana/loki/tree/main/production/helm/loki) and [Promtail](https://github.com/grafana/helm-charts/tree/main/charts/promtail) using the [Helm provider](https://registry.terraform.io/providers/hashicorp/helm/latest/docs) on a Kubernetes cluster:
+## Goals
+- Deploy Prometheus, Alertmanager, and Grafana.
+- Deploy Loki and Promtail for log collection and querying.
+- Expose observability tools behind a configured ingress hostname.
 
-- Configures the `Helm provider` to use your local Kubernetes config.
-- Installs the `Grafana` Helm chart with pre-configured dashboards and datasources.
-- Installs the `Alertmanager` Helm chart with pre-configured alerts.
-- Installs the `Prometheus Operator` Helm chart with `Node Exporter`.
-- Installs the `Loki` Helm chart.
-- Installs the `Promtail` Helm chart.
-
-All Terraform resources are defined in a single file: `main.tf`.
-
-## Components
-
-- **Namespace**
-    - `prometheus` (created automatically)
-    - `loki` (created automatically)
-    - `promtail` (created automatically)
-- **Helm Releases** 
-    - `kube-prometheus-stack`
-    - `loki`
-    - `promtail`
+## Repository Structure
+- `main.tf`: Helm releases and related resources.
+- `variables.tf`: input variables such as ingress hostname.
+- `outputs.tf`: Terraform outputs.
+- `versions.tf`: Terraform/provider version constraints.
 
 ## Prerequisites
-
-- A Kubernetes cluster (Minikube, EKS, GKE) with an `Ingress Controller`
-- A configured `~/.kube/config` file
-- [Terraform](https://www.terraform.io/downloads)
-- [kubectl](https://kubernetes.io/docs/tasks/tools/)
+- Kubernetes cluster with an ingress controller
+- Valid `~/.kube/config`
+- `terraform`
+- `kubectl`
 
 ## Usage
-
-### 1. Initialize Terraform
-
-Run this command to initialize Terraform and download necessary providers and modules:
-
+### 1) Initialize
 ```bash
 export TF_VAR_ingress_hostname=<hostname>
-
 terraform init
 ```
 
-### 2. Apply Terraform
-
-To deploy the Kubernetes resources, run:
-
+### 2) Deploy
 ```bash
 terraform apply
 ```
 
-Prometheus should be available at `https://<hostname>/prometheus`  
-Alertmanager should be available at `https://<hostname>/alertmanager`  
-Grafana should be available at `https://<hostname>/grafana` with `Prometheus` and `Loki` datasources  
+## Validation
+After deployment, verify endpoints:
+- `https://<hostname>/prometheus`
+- `https://<hostname>/alertmanager`
+- `https://<hostname>/grafana`
 
-### 3. Cleanup
-
-To delete all resources created by Terraform:
-
+## Cleanup
 ```bash
 terraform destroy
-
 unset TF_VAR_ingress_hostname
 ```

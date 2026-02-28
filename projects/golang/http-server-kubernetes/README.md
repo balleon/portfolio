@@ -1,57 +1,48 @@
-# Go HTTP server on Kubernetes
+# Go HTTP Server on Kubernetes
 
-This Go program runs a web server that listens for HTTP GET requests at `/version`. When accessed, it connects to a Kubernetes cluster (using your `kubeconfig` or Kubernetes `ServiceAccount`) and returns the cluster's Kubernetes version in JSON format.  
+## Overview
+This project exposes an HTTP endpoint (`/version`) returning Kubernetes server version information from a Go application deployed to Kubernetes.
 
-This guide describes:
-- how to build the application's Docker image from the Go source code
-- then deploy it on Kubernetes.
+## Goals
+- Build and lint a Go HTTP service.
+- Package the application as a container image.
+- Deploy with Kubernetes manifests (Namespace, Deployment, Service, Ingress).
+
+## Repository Structure
+- `source/`: Go source code and module.
+- `deploy/kubernetes/`: deployment manifests.
+- `Dockerfile`: container build definition.
 
 ## Prerequisites
-
-- Access to a Linux or Unix-like terminal
-- A Kubernetes cluster (Minikube, EKS, GKE)
-- A configured `~/.kube/config` file
-- A Docker registry
-- [Docker](https://docs.docker.com/engine/install/)
-- [kubectl](https://kubernetes.io/docs/tasks/tools/)
-- [Go](https://go.dev/doc/install)
-- [golangci-lint](https://golangci-lint.run/welcome/install/)
+- A Kubernetes cluster
+- Docker
+- Go
+- `golangci-lint`
+- `kubectl`
 
 ## Usage
-
-### 1. Initializes Go package with Docker image
-
-Initializes, downloads dependencies, runs a set of checks and build the Docker image:
-
+### 1) Build and lint
 ```bash
 docker build --tag kube-version:latest .
 
-cd ./source
-
-go mod init github.com/balleon/kubernetes-version
+cd source
 go get .
-
 golangci-lint fmt
 golangci-lint run
-
 cd ..
 ```
 
-### 2. Deploy application in Kubernetes cluster
-
-Before creating Kubernetes resources, the `kube-version` Docker image must be available in a Docker repository.  
-Create Kubernetes resources at once, including a Namespace, Deployment, Service, and Ingress (`host` need to adapted in `ingress.yaml` file), using their respective YAML configuration files:
-
+### 2) Deploy manifests
 ```bash
 kubectl apply --filename=./deploy/kubernetes/{namespace.yaml,deployment.yaml,service.yaml,ingress.yaml}
+```
 
+## Validation
+```bash
 curl http://<hostname>/version
 ```
 
-### 3. Cleanup
-
-Tear down everything created in this guide:
-
+## Cleanup
 ```bash
 kubectl delete --filename=./deploy/kubernetes/{namespace.yaml,deployment.yaml,service.yaml,ingress.yaml}
 ```

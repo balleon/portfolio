@@ -1,54 +1,43 @@
 # GitOps with Argo CD
 
-This guide demonstrates bootstrapping Argo CD using Helmfile and defining an Argo CD `Application` that deploys NGINX from GitHub. It provisions:
+## Overview
+This project bootstraps Argo CD with Helmfile and deploys an NGINX workload through an Argo CD `Application` resource.
 
-- A **Helm Release** for **Argo CD** with Helm
-- A **Kubernetes Deployment** for **NGINX** with Argo CD
+## Goals
+- Install Argo CD in a Kubernetes cluster using declarative Helmfile configuration.
+- Deploy an NGINX application from GitOps manifests.
+- Validate Argo CD synchronization flow end to end.
+
+## Repository Structure
+- `helmfile.yaml`: Argo CD installation definition.
+- `application.yaml`: Argo CD `Application` for NGINX deployment.
 
 ## Prerequisites
-
-- Access to a Linux or Unix-like terminal
-- A Kubernetes cluster (Minikube, EKS, GKE)
-- [kubectl](https://kubernetes.io/docs/tasks/tools/)
-- [Helm](https://helm.sh/docs/intro/install/)
-- [Helmfile](https://helmfile.readthedocs.io/en/latest/#installation)
+- A Kubernetes cluster (Minikube, EKS, GKE, or equivalent)
+- `kubectl`
+- `helm`
+- `helmfile`
 
 ## Usage
-
-### 1. Deploy Argo CD
-
-Use Helmfile to bootstrap and manage Argo CD installation in a reproducible, Git-controlled way:
-
+### 1) Deploy Argo CD
 ```bash
 helmfile --file=helmfile.yaml sync
 ```
 
-### 2. Deploy NGINX from an Argo CD Application
-
-Create Argo CD Application to deploy NGINX HTTP server from a manifest stored in a GitHub repository:
-
+### 2) Deploy NGINX with Argo CD
 ```bash
 kubectl apply --filename=application.yaml
 ```
 
-### 3. Argo CD Application synchronization
-
-Check Argo CD Application status and NGINX deployment:
-
+## Validation
 ```bash
 kubectl get application --namespace=argo
-
 kubectl describe application nginx --namespace=argo
-
 kubectl get pods --namespace=nginx
 ```
 
-### 4. Cleanup
-
-Tear down everything created in this guide:
-
+## Cleanup
 ```bash
 kubectl delete --filename=application.yaml
-
 helmfile --file=helmfile.yaml destroy
 ```

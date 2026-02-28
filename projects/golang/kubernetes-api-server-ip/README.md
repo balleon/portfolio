@@ -1,35 +1,39 @@
-# kubernetes-api-server-ip
+# Kubernetes API Server IP
 
-This project uses `client-go` to connect to a Kubernetes cluster and print the IP address of the Kubernetes API Server.
+## Overview
+This project uses `client-go` to discover and print the Kubernetes API server endpoint IP address from `EndpointSlice` resources.
 
-## How it works
+## Goals
+- Build Kubernetes client configuration from kubeconfig.
+- Query and filter `EndpointSlice` objects for the `kubernetes` service.
+- Print API server endpoint IPs for troubleshooting and diagnostics.
 
-- Builds Kubernetes client config from your local kubeconfig (default: `~/.kube/config`)
-- Queries `discovery.k8s.io/v1` EndpointSlices in `default`
-- Filters by label `kubernetes.io/service-name=kubernetes`
-- Prints the endpoint IP address(es), which correspond to the Kubernetes API Server
+## Repository Structure
+- `main.go`: CLI entrypoint and API server IP lookup logic.
+- `go.mod`: module dependencies.
 
 ## Prerequisites
-
 - Go installed
 - Access to a Kubernetes cluster
-- Valid kubeconfig file (default path: `~/.kube/config`)
+- Valid kubeconfig (default `~/.kube/config`)
 
-## Run
-
+## Usage
+### 1) Run with default kubeconfig
 ```bash
 go mod tidy
 go run main.go
 ```
 
-Or with an explicit kubeconfig path:
-
+### 2) Run with explicit kubeconfig
 ```bash
 go run main.go -kubeconfig /path/to/kubeconfig
 ```
 
-## Example output
-
+## Validation
+Expected output format:
 ```text
 [10.96.0.1]
 ```
+
+## Cleanup
+No cluster resources are created by this tool.
