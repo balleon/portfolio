@@ -4,11 +4,27 @@ provider "helm" {
   }
 }
 
+resource "helm_release" "traefik" {
+  name             = "traefik"
+  repository       = "https://traefik.github.io/charts"
+  chart            = "traefik"
+  version          = "39.0.2"
+  namespace        = "traefik"
+  create_namespace = true
+
+  set = [
+    {
+      name  = "metrics.prometheus.service.enabled"
+      value = "true"
+    }
+  ]
+}
+
 resource "helm_release" "kube_prometheus_stack" {
   name             = "kube-prometheus-stack"
   repository       = "https://prometheus-community.github.io/helm-charts"
   chart            = "kube-prometheus-stack"
-  version          = "75.7.0"
+  version          = "82.4.3"
   namespace        = "prometheus"
   create_namespace = true
 
@@ -54,6 +70,22 @@ resource "helm_release" "kube_prometheus_stack" {
       value = "true"
     },
     {
+      name  = "prometheus.additionalServiceMonitors[0].endpoints[0].port"
+      value = "metrics"
+    },
+    {
+      name  = "prometheus.additionalServiceMonitors[0].name"
+      value = "${helm_release.traefik.name}-monitor"
+    },
+    {
+      name  = "prometheus.additionalServiceMonitors[0].namespaceSelector.matchNames[0]"
+      value = helm_release.traefik.name
+    },
+    {
+      name  = "prometheus.additionalServiceMonitors[0].selector.matchLabels.app\\.kubernetes\\.io/name"
+      value = helm_release.traefik.name
+    },
+    {
       name  = "prometheus.ingress.enabled"
       value = "true"
     },
@@ -94,13 +126,15 @@ resource "helm_release" "kube_prometheus_stack" {
       value = "http://${helm_release.loki.name}-gateway.${helm_release.loki.namespace}.svc.cluster.local"
     }
   ]
+
+  depends_on = [helm_release.traefik]
 }
 
 resource "helm_release" "loki" {
   name             = "loki"
   repository       = "https://grafana.github.io/helm-charts"
   chart            = "loki"
-  version          = "6.30.1"
+  version          = "6.53.0"
   namespace        = "loki"
   create_namespace = true
 
@@ -224,7 +258,7 @@ resource "helm_release" "promtail" {
   name             = "promtail"
   repository       = "https://grafana.github.io/helm-charts"
   chart            = "promtail"
-  version          = "6.17.0"
+  version          = "6.17.1"
   namespace        = "promtail"
   create_namespace = true
 
