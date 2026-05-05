@@ -34,6 +34,7 @@ I am targeting roles as:
 | [Unused Secret Detector (Go)](./projects/golang/unused-secret/) | Improves cluster security posture by detecting and reporting unused Kubernetes Secrets. | Go, client-go, Kubernetes API |
 | [Terraform Module: Ingress NGINX](./projects/iac/terraform-modules/ingress-nginx/) | Standardizes ingress provisioning with a reusable Terraform module pattern. | Terraform, Helm, Kubernetes |
 | [AWS EKS with Terraform](./projects/kubernetes/eks/) | Provisions an AWS EKS platform foundation using infrastructure as code. | Terraform, AWS EKS, Helm, NGINX Ingress |
+| [AWS EKS with Pulumi (Python)](./projects/python/pulumi-eks/) | Provisions AWS VPC, subnets, and EKS cluster using Pulumi infrastructure as code in Python. | Pulumi, Python, AWS EKS, Infrastructure as Code |
 | [Gateway API with Traefik](./projects/kubernetes/gateway-api/) | Exposes Kubernetes services through Gateway API resources managed by a Traefik controller. | Kubernetes Gateway API, Traefik, NGINX |
 | [AI SRE: OOMKilled Remediation with kagent + Ollama](./projects/kubernetes/kagent-ollama-oomkilled/) | Automates Kubernetes incident diagnosis for OOMKilled pods using kagent with a local Ollama LLM. | Kubernetes, Helm, kagent, Ollama, AI Ops |
 | [Monitoring & Observability](./projects/observability/prometheus-grafana-loki/) | Implements a full observability stack for metrics, logs, dashboards, and alerting. | Prometheus, Alertmanager, Grafana, Loki, Promtail, Terraform |
@@ -50,6 +51,7 @@ I am targeting roles as:
 | **Infrastructure as Code** | [Terraform Module: Ingress NGINX](./projects/iac/terraform-modules/ingress-nginx/) |
 | **Kubernetes** | [Amazon EKS Cluster](./projects/kubernetes/eks/), [Gateway API with Traefik](./projects/kubernetes/gateway-api/), [AI SRE: OOMKilled Remediation with kagent + Ollama](./projects/kubernetes/kagent-ollama-oomkilled/), [k3d Cluster Setup](./projects/kubernetes/k3d/) |
 | **Observability** | [Prometheus, Grafana, Loki Stack](./projects/observability/prometheus-grafana-loki/) |
+| **Python** | [Pulumi EKS](./projects/python/pulumi-eks/) |
 
 ---
 
