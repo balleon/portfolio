@@ -9,3 +9,8 @@ config:
   pulumi:tags:
     value:
       pulumi:template: aws-python
+  eks_version: ""
+  vpc_cidr: ""
+  private_subnet_cidrs: {}
+  public_subnet_cidrs: {}
+  availability_zones: {}

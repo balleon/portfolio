@@ -35,15 +35,20 @@ pulumi login --local
 pulumi stack init dev
 ```
 
-### 2) Configure AWS region
+### 2) Set stack configuration
 ```bash
+pulumi config set pulumi-eks:eks_version "1.35"
 pulumi config set aws:region eu-west-3
-```
-
-### 3) (Optional) Override default settings
-```bash
-pulumi config set pulumi-eks:eksVersion "1.35"
-pulumi config set pulumi-eks:vpcCidr "10.0.0.0/16"
+pulumi config set pulumi-eks:vpc_cidr "10.0.0.0/16"
+pulumi config set --path pulumi-eks:private_subnet_cidrs[0] "10.0.0.0/24"
+pulumi config set --path pulumi-eks:private_subnet_cidrs[1] "10.0.1.0/24"
+pulumi config set --path pulumi-eks:private_subnet_cidrs[2] "10.0.2.0/24"
+pulumi config set --path pulumi-eks:public_subnet_cidrs[0] "10.0.3.0/24"
+pulumi config set --path pulumi-eks:public_subnet_cidrs[1] "10.0.4.0/24"
+pulumi config set --path pulumi-eks:public_subnet_cidrs[2] "10.0.5.0/24"
+pulumi config set --path pulumi-eks:availability_zones[0] "eu-west-3a"
+pulumi config set --path pulumi-eks:availability_zones[1] "eu-west-3b"
+pulumi config set --path pulumi-eks:availability_zones[2] "eu-west-3c"
 ```
 
 ### 4) Install dependencies

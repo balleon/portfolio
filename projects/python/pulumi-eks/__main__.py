@@ -2,10 +2,13 @@ import pulumi
 import json
 import pulumi_aws as aws
 
-vpc_cidr = "10.0.0.0/16"
-private_subnet_cidrs = ["10.0.0.0/24", "10.0.1.0/24", "10.0.2.0/24"]
-public_subnet_cidrs = ["10.0.3.0/24", "10.0.4.0/24", "10.0.5.0/24"]
-availability_zones = ["eu-west-3a", "eu-west-3b", "eu-west-3c"]
+config = pulumi.Config()
+
+eks_version = config.require("eks_version")
+vpc_cidr = config.require("vpc_cidr")
+private_subnet_cidrs = config.require_object("private_subnet_cidrs")
+public_subnet_cidrs = config.require_object("public_subnet_cidrs")
+availability_zones = config.require_object("availability_zones")
 
 ################################################################################
 # VPC (https://www.pulumi.com/registry/packages/aws/api-docs/ec2/vpc/)
@@ -219,7 +222,7 @@ eks_cluster = aws.eks.Cluster("eks_cluster",
         "bootstrap_cluster_creator_admin_permissions": True,
     },
     role_arn=eks_cluster_role.arn,
-    version="1.35",
+    version=eks_version,
     bootstrap_self_managed_addons=False,
     compute_config={
         "enabled": True,
