@@ -38,6 +38,28 @@ After deployment, verify endpoints:
 - `https://<hostname>/alertmanager`
 - `https://<hostname>/grafana`
 
+## Grafana Dashboard: SLI/SLO (Availability)
+This project includes a dashboard to illustrate SRE concepts using the NGINX HTTP server metrics exposed by `nginx-prometheus-exporter`.
+
+- Dashboard file (embedded): `manifests/grafana-dashboard-configmap.yaml`
+- SLI: availability computed from `nginx_up`
+- SLO target: shown on dashboard as fixed `99.9%`
+- Includes: 1d availability, error budget remaining, 1h burn rate, availability trend, and request rate
+
+### Import via ConfigMap (auto-provisioning)
+If you prefer GitOps/Kubernetes-native dashboard provisioning, apply:
+
+```bash
+kubectl apply -f manifests/grafana-dashboard-configmap.yaml
+```
+
+This ConfigMap is created in namespace `prometheus` with label `grafana_dashboard: "1"`, which is watched by Grafana sidecar in `kube-prometheus-stack`.
+
+### PromQL used for SLI/SLO
+- SLI (1d availability): `100 * avg_over_time((avg(nginx_up{namespace="nginx"}) or on() vector(0))[1d:1m])`
+- Error budget remaining (%): `100 * clamp_min((avg_over_time((avg(nginx_up{namespace="nginx"}) or on() vector(0))[1d:1m]) - 0.999) / (1 - 0.999), 0)`
+- Burn rate (1h): `(1 - avg_over_time((avg(nginx_up{namespace="nginx"}) or on() vector(0))[1h:1m])) / (1 - 0.999)`
+
 ## Cleanup
 ```bash
 terraform destroy
