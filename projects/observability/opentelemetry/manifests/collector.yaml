@@ -1,11 +1,10 @@
 apiVersion: opentelemetry.io/v1beta1
 kind: OpenTelemetryCollector
 metadata:
-  name: otel-collector
+  name: collector
   namespace: opentelemetry
 spec:
-  mode: deployment
-  replicas: 1
+  mode: sidecar
 
   config:
     receivers:
