@@ -4,7 +4,7 @@ metadata:
   name: collector
   namespace: opentelemetry
 spec:
-  mode: sidecar
+  mode: deployment
 
   config:
     receivers:
@@ -32,7 +32,7 @@ spec:
 
       # Metrics to Prometheus via OTLP HTTP receiver
       otlphttp/prometheus:
-        endpoint: http://prometheus-server.prometheus.svc.cluster.local:80/api/v1/otlp/v1/metrics
+        endpoint: http://prometheus-server.prometheus.svc.cluster.local:80/prometheus/api/v1/otlp
         tls:
           insecure: true
 

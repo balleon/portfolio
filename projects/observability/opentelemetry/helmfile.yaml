@@ -42,6 +42,8 @@ releases:
       - server:
           prefixURL: /prometheus
           baseURL: http://172.22.142.254.nip.io/prometheus
+          extraFlags:
+            - web.enable-otlp-receiver
           ingress:
             enabled: true
             hosts:
