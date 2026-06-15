@@ -4,6 +4,7 @@ helmfile sync
 
 kubectl apply -f manifests/collector.yaml
 kubectl apply -f manifests/instrumentation.yaml
+
 kubectl apply -f manifests/application.yaml
 
 # Undeploy
