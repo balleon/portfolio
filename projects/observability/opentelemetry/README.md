@@ -1,5 +1,6 @@
 # Deploy
 k3d cluster create test --port "80:80@loadbalancer" --port "443:443@loadbalancer" --k3s-arg "--disable=traefik@server:*"
+
 helmfile sync
 
 kubectl apply --filename=manifests/collector.yaml
@@ -14,6 +15,9 @@ curl http://172.22.142.254.nip.io/test
 
 # Undeploy
 kubectl delete --filename=manifests/
+
 helmfile destroy
+
 kubectl delete pvc --all --namespace=loki
+
 k3d cluster delete test

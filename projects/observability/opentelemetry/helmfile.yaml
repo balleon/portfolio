@@ -30,8 +30,7 @@ releases:
             exposedPort: 443
             port: 443
             protocol: TCP
-
-# https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus
+  # https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus
   - name: prometheus
     namespace: observability
     chart: prometheus-community/prometheus
@@ -55,7 +54,6 @@ releases:
           enabled: false
         prometheus-pushgateway:
           enabled: false
-
   # https://github.com/grafana-community/helm-charts/tree/main/charts/grafana
   - name: grafana
     namespace: observability
@@ -94,7 +92,6 @@ releases:
               url: http://tempo.observability.svc.cluster.local:3200
               access: proxy
               isDefault: false
-
   # https://github.com/grafana-community/helm-charts/tree/main/charts/loki
   - name: loki
     namespace: observability
@@ -147,7 +144,6 @@ releases:
           enabled: false
         chunksCache:
           enabled: false
-
   # https://github.com/grafana-community/helm-charts/tree/main/charts/tempo
   - name: tempo
     namespace: observability
@@ -156,7 +152,6 @@ releases:
     needs:
       - observability/grafana
     values: []
-
   # https://github.com/cert-manager/cert-manager/tree/master/deploy/charts/cert-manager (required for OpenTelemetry Operator)
   - name: cert-manager
     namespace: cert-manager
@@ -165,7 +160,6 @@ releases:
     values:
       - crds:
           enabled: true
-
   # https://github.com/open-telemetry/opentelemetry-helm-charts/tree/main/charts/opentelemetry-operator
   - name: opentelemetry-operator
     namespace: otel
