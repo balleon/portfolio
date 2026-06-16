@@ -33,11 +33,11 @@ releases:
 
 # https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus
   - name: prometheus
-    namespace: prometheus
+    namespace: observability
     chart: prometheus-community/prometheus
     version: 29.11.0
     needs:
-    - traefik/traefik
+      - traefik/traefik
     values:
       - server:
           prefixURL: /prometheus
@@ -58,11 +58,11 @@ releases:
 
   # https://github.com/grafana-community/helm-charts/tree/main/charts/grafana
   - name: grafana
-    namespace: grafana
+    namespace: observability
     chart: grafana-community/grafana
     version: 12.4.5
     needs:
-    - prometheus/prometheus
+      - observability/prometheus
     values:
       - ingress:
           enabled: true
@@ -81,27 +81,27 @@ releases:
             datasources:
             - name: Prometheus
               type: prometheus
-              url: http://prometheus-server.prometheus.svc.cluster.local:80/prometheus
+              url: http://prometheus-server.observability.svc.cluster.local:80/prometheus
               access: proxy
               isDefault: true
             - name: Loki
               type: loki
-              url: http://loki.loki.svc.cluster.local:3100
+              url: http://loki.observability.svc.cluster.local:3100
               access: proxy
               isDefault: false
             - name: Tempo
               type: tempo
-              url: http://tempo.tempo.svc.cluster.local:3200
+              url: http://tempo.observability.svc.cluster.local:3200
               access: proxy
               isDefault: false
 
   # https://github.com/grafana-community/helm-charts/tree/main/charts/loki
   - name: loki
-    namespace: loki
+    namespace: observability
     chart: grafana-community/loki
     version: 17.4.0
     needs:
-    - grafana/grafana
+      - observability/grafana
     values:
       - loki:
           auth_enabled: false
@@ -150,11 +150,11 @@ releases:
 
   # https://github.com/grafana-community/helm-charts/tree/main/charts/tempo
   - name: tempo
-    namespace: tempo
+    namespace: observability
     chart: grafana-community/tempo
     version: 2.2.3
     needs:
-    - grafana/grafana
+      - observability/grafana
     values: []
 
   # https://github.com/cert-manager/cert-manager/tree/master/deploy/charts/cert-manager (required for OpenTelemetry Operator)
@@ -168,9 +168,9 @@ releases:
 
   # https://github.com/open-telemetry/opentelemetry-helm-charts/tree/main/charts/opentelemetry-operator
   - name: opentelemetry-operator
-    namespace: opentelemetry
+    namespace: otel
     chart: open-telemetry/opentelemetry-operator
     version: 0.115.0
     needs:
-    - cert-manager/cert-manager
+      - cert-manager/cert-manager
     values: []

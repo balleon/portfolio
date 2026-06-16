@@ -2,10 +2,10 @@ apiVersion: opentelemetry.io/v1alpha1
 kind: Instrumentation
 metadata:
   name: instrumentation
-  namespace: opentelemetry
+  namespace: otel
 spec:
   exporter:
-    endpoint: http://collector-collector.opentelemetry.svc.cluster.local:4318
+    endpoint: http://collector-collector.otel.svc.cluster.local:4318
   env:
   propagators:
     - tracecontext

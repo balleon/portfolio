@@ -2,7 +2,7 @@ apiVersion: opentelemetry.io/v1beta1
 kind: OpenTelemetryCollector
 metadata:
   name: collector
-  namespace: opentelemetry
+  namespace: otel
 spec:
   mode: deployment
 
@@ -26,19 +26,19 @@ spec:
     exporters:
       # Traces to Tempo
       otlphttp/tempo:
-        endpoint: http://tempo.tempo.svc.cluster.local:4318
+        endpoint: http://tempo.observability.svc.cluster.local:4318
         tls:
           insecure: true
 
       # Metrics to Prometheus via OTLP HTTP receiver
       otlphttp/prometheus:
-        endpoint: http://prometheus-server.prometheus.svc.cluster.local:80/prometheus/api/v1/otlp
+        endpoint: http://prometheus-server.observability.svc.cluster.local:80/prometheus/api/v1/otlp
         tls:
           insecure: true
 
       # Logs to Loki
       otlphttp/loki:
-        endpoint: http://loki.loki.svc.cluster.local:3100/otlp
+        endpoint: http://loki.observability.svc.cluster.local:3100/otlp
         tls:
           insecure: true
 

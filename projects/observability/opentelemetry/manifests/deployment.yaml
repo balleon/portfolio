@@ -1,10 +1,15 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: test
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
     app: test
   name: test
-  namespace: default
+  namespace: test
 spec:
   replicas: 1
   selector:
@@ -15,7 +20,7 @@ spec:
       labels:
         app: test
       annotations:
-        instrumentation.opentelemetry.io/inject-python: "opentelemetry/instrumentation"
+        instrumentation.opentelemetry.io/inject-python: "otel/instrumentation"
         instrumentation.opentelemetry.io/otel-python-platform: "glibc"
     spec:
       containers:
@@ -49,7 +54,7 @@ metadata:
   labels:
     app: test
   name: test
-  namespace: default
+  namespace: test
 spec:
   ports:
   - port: 8080
@@ -62,9 +67,9 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: test
-  namespace: default
+  namespace: test
   annotations:
-    traefik.ingress.kubernetes.io/router.middlewares: default-test-strip-prefix@kubernetescrd
+    traefik.ingress.kubernetes.io/router.middlewares: test-test-strip-prefix@kubernetescrd
 spec:
   ingressClassName: traefik
   rules:
@@ -82,7 +87,7 @@ apiVersion: traefik.io/v1alpha1
 kind: Middleware
 metadata:
   name: test-strip-prefix
-  namespace: default
+  namespace: test
 spec:
   stripPrefix:
     prefixes:
