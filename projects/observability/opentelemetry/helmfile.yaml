@@ -40,13 +40,13 @@ releases:
     values:
       - server:
           prefixURL: /prometheus
-          baseURL: http://172.22.142.254.nip.io/prometheus
+          baseURL: http://<REDACTED>/prometheus
           extraFlags:
             - web.enable-otlp-receiver
           ingress:
             enabled: true
             hosts:
-              - 172.22.142.254.nip.io
+              - <REDACTED>
             path: /prometheus
           persistentVolume:
             enabled: false
@@ -66,12 +66,12 @@ releases:
           enabled: true
           path: /grafana
           hosts:
-            - 172.22.142.254.nip.io
+            - <REDACTED>
         grafana.ini:
           server:
             root_url: "%(protocol)s://%(domain)s/grafana"
             serve_from_sub_path: true
-            domain: 172.22.142.254.nip.io
+            domain: <REDACTED>
         adminPassword: admin
         datasources:
           datasources.yaml:
