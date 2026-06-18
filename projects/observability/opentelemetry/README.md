@@ -5,6 +5,9 @@ This project deploys a full observability stack on Kubernetes and demonstrates z
 
 Traces, metrics, and logs are collected by an `OpenTelemetryCollector` and routed to Tempo, Prometheus, and Loki respectively, then visualized in Grafana.
 
+## Security Warning
+This project uses hardcoded credentials for demonstration purposes (Grafana `adminPassword`). Do not use it in any non-local environment.
+
 ## Goals
 - Deploy Prometheus, Grafana, Loki, and Tempo as the observability backend.
 - Install the OpenTelemetry Operator and configure a Collector to receive OTLP signals.
