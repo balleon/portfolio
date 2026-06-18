@@ -16,7 +16,7 @@ I am targeting roles as:
 **Cloud & Infrastructure:** AWS, VPC, EKS, Network Load Balancer  
 **Containers & Orchestration:** Docker, Kubernetes, k3d, NGINX Ingress  
 **IaC & GitOps:** Terraform, Helm, Helmfile, Argo CD  
-**Observability:** Prometheus, Alertmanager, Grafana, Loki, Promtail  
+**Observability:** Prometheus, Alertmanager, Grafana, Loki, Promtail, Tempo, OpenTelemetry  
 **CI/CD & Automation:** GitHub Actions, self-hosted runners, scripting  
 **Programming:** Go, Python
 
@@ -38,6 +38,7 @@ I am targeting roles as:
 | [Gateway API with Traefik](./projects/kubernetes/gateway-api/) | Exposes Kubernetes services through Gateway API resources managed by a Traefik controller. | Kubernetes Gateway API, Traefik, NGINX |
 | [AI SRE: OOMKilled Remediation with kagent + Ollama](./projects/kubernetes/kagent-ollama-oomkilled/) | Automates Kubernetes incident diagnosis for OOMKilled pods using kagent with a local Ollama LLM. | Kubernetes, Helm, kagent, Ollama, AI Ops |
 | [Monitoring & Observability](./projects/observability/prometheus-grafana-loki/) | Implements a full observability stack for metrics, logs, dashboards, and alerting. | Prometheus, Alertmanager, Grafana, Loki, Promtail, Terraform |
+| [OpenTelemetry Auto-Instrumentation](./projects/observability/opentelemetry/) | Instruments a Python application without code changes using the OpenTelemetry Operator and routes traces, metrics, and logs to Tempo, Prometheus, and Loki. | OpenTelemetry, Prometheus, Grafana, Loki, Tempo, Helmfile, Kubernetes |
 
 ---
 
@@ -50,7 +51,7 @@ I am targeting roles as:
 | **Golang** | [HTTP Server Kubernetes](./projects/golang/http-server-kubernetes/), [Kubernetes API Server IP](./projects/golang/kubernetes-api-server-ip/), [Kubernetes Operator](./projects/golang/kubernetes-operator/), [Unused Secret Detector](./projects/golang/unused-secret/) |
 | **Infrastructure as Code** | [Terraform Module: Ingress NGINX](./projects/iac/terraform-modules/ingress-nginx/) |
 | **Kubernetes** | [Amazon EKS Cluster](./projects/kubernetes/eks/), [Gateway API with Traefik](./projects/kubernetes/gateway-api/), [AI SRE: OOMKilled Remediation with kagent + Ollama](./projects/kubernetes/kagent-ollama-oomkilled/), [k3d Cluster Setup](./projects/kubernetes/k3d/) |
-| **Observability** | [Prometheus, Grafana, Loki Stack](./projects/observability/prometheus-grafana-loki/) |
+| **Observability** | [Prometheus, Grafana, Loki Stack](./projects/observability/prometheus-grafana-loki/), [OpenTelemetry Auto-Instrumentation](./projects/observability/opentelemetry/) |
 | **Python** | [Pulumi EKS](./projects/python/pulumi-eks/) |
 
 ---
