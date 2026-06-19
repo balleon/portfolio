@@ -5,9 +5,6 @@ This project deploys a full observability stack on Kubernetes and demonstrates z
 
 Traces, metrics, and logs are collected by an `OpenTelemetryCollector` and routed to Tempo, Prometheus, and Loki respectively, then visualized in Grafana.
 
-## Security Warning
-Grafana's `adminPassword` is hardcoded in `helmfile.yaml` for demonstration purposes. Do not use this value in any non-local environment.
-
 ## Goals
 - Deploy Prometheus, Grafana, Loki, and Tempo as the observability backend.
 - Install the OpenTelemetry Operator and configure a Collector to receive OTLP signals.
@@ -17,7 +14,7 @@ Grafana's `adminPassword` is hardcoded in `helmfile.yaml` for demonstration purp
 ## Architecture
 ```
 Python Flask app
-  │  (auto-instrumented via pod annotation — no code changes)
+  │  (auto-instrumented via Annotation — no code changes)
   ▼
 OpenTelemetry Collector  (OTLP gRPC :4317 / HTTP :4318)
   ├── traces   ──► Tempo
@@ -50,6 +47,8 @@ k3d cluster create test \
 
 ### 2) Deploy the observability stack
 ```bash
+export INGRESS_HOSTNAME=<hostname>
+export GRAFANA_ADMIN_PASSWORD=<password>
 helmfile sync
 ```
 
@@ -63,12 +62,12 @@ kubectl apply --filename=manifests/deployment.yaml
 ## Validation
 Send a request to the instrumented endpoint:
 ```bash
-curl http://<REDACTED>/test
+curl http://${INGRESS_HOSTNAME}/test
 ```
 
 Access the observability UIs:
-- Grafana: `http://<REDACTED>/grafana`
-- Prometheus: `http://<REDACTED>/prometheus` (`count by (__name__) ({job="test/test"})`)
+- Grafana: `http://${INGRESS_HOSTNAME}/grafana`
+- Prometheus: `http://${INGRESS_HOSTNAME}/prometheus` (`count by (__name__) ({job="test/test"})`)
   — counts the number of active time series per metric name for the instrumented app; confirms that OTLP metrics are reaching Prometheus.
 
 Query traces, metrics, and logs in Grafana using the pre-configured Tempo, Prometheus, and Loki datasources.
@@ -82,4 +81,7 @@ helmfile destroy
 kubectl delete pvc --all --namespace=loki
 
 k3d cluster delete test
+
+unset INGRESS_HOSTNAME
+unset GRAFANA_ADMIN_PASSWORD
 ```

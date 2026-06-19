@@ -40,13 +40,13 @@ releases:
     values:
       - server:
           prefixURL: /prometheus
-          baseURL: http://<REDACTED>/prometheus
+          baseURL: http://{{ requiredEnv "INGRESS_HOSTNAME" }}/prometheus
           extraFlags:
             - web.enable-otlp-receiver
           ingress:
             enabled: true
             hosts:
-              - <REDACTED>
+              - {{ requiredEnv "INGRESS_HOSTNAME" }}
             path: /prometheus
           persistentVolume:
             enabled: false
@@ -66,13 +66,13 @@ releases:
           enabled: true
           path: /grafana
           hosts:
-            - <REDACTED>
+            - {{ requiredEnv "INGRESS_HOSTNAME" }}
         grafana.ini:
           server:
             root_url: "%(protocol)s://%(domain)s/grafana"
             serve_from_sub_path: true
-            domain: <REDACTED>
-        adminPassword: admin
+            domain: {{ requiredEnv "INGRESS_HOSTNAME" }}
+        adminPassword: {{ requiredEnv "GRAFANA_ADMIN_PASSWORD" }}
         datasources:
           datasources.yaml:
             apiVersion: 1
