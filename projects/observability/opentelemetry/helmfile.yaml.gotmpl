@@ -1,0 +1,170 @@
+helmDefaults:
+  wait: true
+  waitForJobs: true
+
+repositories:
+  - name: traefik
+    url: https://traefik.github.io/charts
+  - name: prometheus-community
+    url: https://prometheus-community.github.io/helm-charts
+  - name: grafana-community
+    url: https://grafana-community.github.io/helm-charts
+  - name: open-telemetry
+    url: https://open-telemetry.github.io/opentelemetry-helm-charts
+  - name: jetstack
+    url: https://charts.jetstack.io
+
+releases:
+  # https://github.com/traefik/traefik-helm-chart/tree/master/traefik
+  - name: traefik
+    namespace: traefik
+    chart: traefik/traefik
+    version: 40.3.0
+    values:
+      - ports:
+          web:
+            exposedPort: 80
+            port: 80
+            protocol: TCP
+          websecure:
+            exposedPort: 443
+            port: 443
+            protocol: TCP
+  # https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus
+  - name: prometheus
+    namespace: observability
+    chart: prometheus-community/prometheus
+    version: 29.11.0
+    needs:
+      - traefik/traefik
+    values:
+      - server:
+          prefixURL: /prometheus
+          baseURL: http://{{ requiredEnv "INGRESS_HOSTNAME" }}/prometheus
+          extraFlags:
+            - web.enable-otlp-receiver
+          ingress:
+            enabled: true
+            hosts:
+              - {{ requiredEnv "INGRESS_HOSTNAME" }}
+            path: /prometheus
+          persistentVolume:
+            enabled: false
+        alertmanager:
+          enabled: false
+        prometheus-pushgateway:
+          enabled: false
+  # https://github.com/grafana-community/helm-charts/tree/main/charts/grafana
+  - name: grafana
+    namespace: observability
+    chart: grafana-community/grafana
+    version: 12.4.5
+    needs:
+      - observability/prometheus
+    values:
+      - ingress:
+          enabled: true
+          path: /grafana
+          hosts:
+            - {{ requiredEnv "INGRESS_HOSTNAME" }}
+        grafana.ini:
+          server:
+            root_url: "%(protocol)s://%(domain)s/grafana"
+            serve_from_sub_path: true
+            domain: {{ requiredEnv "INGRESS_HOSTNAME" }}
+        adminPassword: {{ requiredEnv "GRAFANA_ADMIN_PASSWORD" }}
+        datasources:
+          datasources.yaml:
+            apiVersion: 1
+            datasources:
+            - name: Prometheus
+              type: prometheus
+              url: http://prometheus-server.observability.svc.cluster.local:80/prometheus
+              access: proxy
+              isDefault: true
+            - name: Loki
+              type: loki
+              url: http://loki.observability.svc.cluster.local:3100
+              access: proxy
+              isDefault: false
+            - name: Tempo
+              type: tempo
+              url: http://tempo.observability.svc.cluster.local:3200
+              access: proxy
+              isDefault: false
+  # https://github.com/grafana-community/helm-charts/tree/main/charts/loki
+  - name: loki
+    namespace: observability
+    chart: grafana-community/loki
+    version: 17.4.0
+    needs:
+      - observability/grafana
+    values:
+      - loki:
+          auth_enabled: false
+          commonConfig:
+            replication_factor: 1
+          schemaConfig:
+            configs:
+              - from: "2024-04-01"
+                object_store: s3
+                store: tsdb
+                schema: v13
+                index:
+                  prefix: index_
+                  period: 24h
+          pattern_ingester:
+            enabled: true
+          limits_config:
+            allow_structured_metadata: true
+            volume_enabled: true
+        ignoreMinioDeprecation: true
+        minio:
+          enabled: true
+        deploymentMode: SingleBinary
+        backend:
+          enabled: false
+        read:
+          enabled: false
+        write:
+          enabled: false
+        ingester:
+          enabled: false
+        querier:
+          enabled: false
+        queryFrontend:
+          enabled: false
+        queryScheduler:
+          enabled: false
+        distributor:
+          enabled: false
+        compactor:
+          enabled: false
+        indexGateway:
+          enabled: false
+        chunksCache:
+          enabled: false
+  # https://github.com/grafana-community/helm-charts/tree/main/charts/tempo
+  - name: tempo
+    namespace: observability
+    chart: grafana-community/tempo
+    version: 2.2.3
+    needs:
+      - observability/grafana
+    values: []
+  # https://github.com/cert-manager/cert-manager/tree/master/deploy/charts/cert-manager (required for OpenTelemetry Operator)
+  - name: cert-manager
+    namespace: cert-manager
+    chart: jetstack/cert-manager
+    version: v1.20.2
+    values:
+      - crds:
+          enabled: true
+  # https://github.com/open-telemetry/opentelemetry-helm-charts/tree/main/charts/opentelemetry-operator
+  - name: opentelemetry-operator
+    namespace: otel
+    chart: open-telemetry/opentelemetry-operator
+    version: 0.115.0
+    needs:
+      - cert-manager/cert-manager
+    values: []

@@ -1,0 +1,94 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: test
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: test
+  name: test
+  namespace: test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: test
+  template:
+    metadata:
+      labels:
+        app: test
+      annotations:
+        instrumentation.opentelemetry.io/inject-python: "otel/instrumentation"
+        instrumentation.opentelemetry.io/otel-python-platform: "glibc"
+    spec:
+      containers:
+      - image: docker.io/python:3.11-slim
+        name: test
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            pip install flask --quiet && python -c "
+            from flask import Flask
+            app = Flask(__name__)
+
+            @app.get('/')
+            def home(): return 'ok'
+
+            app.run(host='0.0.0.0', port=8080)
+            "
+        ports:
+        - containerPort: 8080
+        env:
+        - name: OTEL_SERVICE_NAME
+          value: test
+        - name: OTEL_LOGS_EXPORTER
+          value: otlp
+        - name: OTEL_METRICS_EXPORTER
+          value: otlp
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: test
+  name: test
+  namespace: test
+spec:
+  ports:
+  - port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: test
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: test
+  namespace: test
+  annotations:
+    traefik.ingress.kubernetes.io/router.middlewares: test-test-strip-prefix@kubernetescrd
+spec:
+  ingressClassName: traefik
+  rules:
+  - http:
+      paths:
+      - path: /test
+        pathType: Prefix
+        backend:
+          service:
+            name: test
+            port:
+              number: 8080
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: test-strip-prefix
+  namespace: test
+spec:
+  stripPrefix:
+    prefixes:
+    - /test
