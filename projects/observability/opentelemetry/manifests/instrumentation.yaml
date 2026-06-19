@@ -6,7 +6,6 @@ metadata:
 spec:
   exporter:
     endpoint: http://collector-collector.otel.svc.cluster.local:4318
-  env:
   propagators:
     - tracecontext
     - baggage
