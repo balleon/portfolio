@@ -72,6 +72,16 @@ Access the observability UIs:
 
 Query traces, metrics, and logs in Grafana using the pre-configured Tempo, Prometheus, and Loki datasources.
 
+## Screenshots
+Prometheus — metrics emitted by the auto-instrumented Flask app:
+![Prometheus](./images/prometheus.png)
+
+Loki — structured logs collected via OTLP:
+![Loki](./images/loki.png)
+
+Tempo — distributed traces from the Flask app:
+![Tempo](./images/tempo.png)
+
 ## Cleanup
 ```bash
 kubectl delete --filename=manifests/
