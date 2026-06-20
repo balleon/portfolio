@@ -4,6 +4,42 @@ provider "helm" {
   }
 }
 
+resource "helm_release" "traefik" {
+  name             = "traefik"
+  repository       = "https://traefik.github.io/charts"
+  chart            = "traefik"
+  version          = "40.3.0"
+  namespace        = "traefik"
+  create_namespace = true
+
+  set = [
+    {
+      name  = "ports.web.exposedPort"
+      value = 80
+    },
+    {
+      name  = "ports.web.port"
+      value = 80
+    },
+    {
+      name  = "ports.web.protocol"
+      value = "TCP"
+    },
+    {
+      name  = "ports.websecure.exposedPort"
+      value = 443
+    },
+    {
+      name  = "ports.websecure.port"
+      value = 443
+    },
+    {
+      name  = "ports.websecure.protocol"
+      value = "TCP"
+    }
+  ]
+}
+
 resource "helm_release" "kube_prometheus_stack" {
   name             = "kube-prometheus-stack"
   repository       = "https://prometheus-community.github.io/helm-charts"
@@ -93,6 +129,10 @@ resource "helm_release" "kube_prometheus_stack" {
       name  = "grafana.additionalDataSources[0].url"
       value = "http://${helm_release.loki.name}-gateway.${helm_release.loki.namespace}.svc.cluster.local"
     }
+  ]
+
+  depends_on = [
+    helm_release.traefik
   ]
 }
 
