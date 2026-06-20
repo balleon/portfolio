@@ -72,5 +72,5 @@ I am targeting roles as:
 - [`projects/golang/`](./projects/golang/) — Go-based applications and Kubernetes utilities.
 - [`projects/iac/`](./projects/iac/) — infrastructure as code modules and reusable Terraform components.
 - [`projects/kubernetes/`](./projects/kubernetes/) — Kubernetes platform and cluster setup projects.
-- [`projects/observability/`](./projects/observability/) — monitoring, logging, and alerting stacks.
+- [`projects/observability/`](./projects/observability/) — monitoring, tracing, logging, and alerting stacks.
 - [`.github/workflows/`](./.github/workflows/) — CI workflow examples.

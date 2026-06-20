@@ -42,7 +42,7 @@ releases:
           prefixURL: /prometheus
           baseURL: http://{{ requiredEnv "INGRESS_HOSTNAME" }}/prometheus
           extraFlags:
-            - web.enable-otlp-receiver
+            - web.enable-otlp-receiver # https://prometheus.io/docs/guides/opentelemetry/#enable-the-otlp-receiver
           ingress:
             enabled: true
             hosts:
