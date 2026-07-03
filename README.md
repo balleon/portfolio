@@ -11,6 +11,16 @@ I am targeting roles as:
 
 ---
 
+## Table of Contents
+
+- [Skills & Tools](#skills--tools)
+- [Featured Projects](#featured-projects)
+- [Projects by Section](#projects-by-section)
+- [Core Focus Areas](#core-focus-areas)
+- [Repository Structure](#repository-structure)
+
+---
+
 ## Skills & Tools
 
 **Cloud & Infrastructure:** AWS, VPC, EKS, Network Load Balancer  
