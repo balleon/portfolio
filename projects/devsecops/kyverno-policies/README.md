@@ -75,11 +75,11 @@ kubectl run nginx --namespace=default --image=nginx --labels="test=true"
 ```
 
 ## Screenshots
-Privileged Pod rejected by `disallow-privileged-containers`:
-![Disallow privileged containers](./images/disallow-privileged-containers.png)
-
 Pod missing the required label rejected by `require-labels`:
 ![Require labels](./images/require-labels.png)
+
+Privileged Pod rejected by `disallow-privileged-containers` and `require-labels`:
+![Disallow privileged containers](./images/disallow-privileged-containers.png)
 
 ## Cleanup
 ```bash
