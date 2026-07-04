@@ -75,10 +75,7 @@ kubectl run nginx --namespace=default --image=nginx --labels="test=true"
 ```
 
 ## Screenshots
-`kubectl get clusterpolicy` — both policies installed and ready:
-![ClusterPolicy](./images/cluster-policy.png)
-
-Privileged Pod without labels rejected by both policies:
+Privileged Pod rejected by `disallow-privileged-containers`:
 ![Disallow privileged containers](./images/disallow-privileged-containers.png)
 
 Pod missing the required label rejected by `require-labels`:
