@@ -1,6 +1,6 @@
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
-  version = "5.21.0"
+  version = "6.6.1"
 
   name = var.cluster_name
   cidr = var.cluster_cidr
@@ -30,15 +30,17 @@ module "vpc" {
 
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
-  version = "20.37.1"
+  version = "21.24.0"
 
-  cluster_name                   = var.cluster_name
-  cluster_version                = "1.33"
-  cluster_endpoint_public_access = true
+  name = var.cluster_name
+
+  kubernetes_version = "1.36"
+
+  endpoint_public_access = true
 
   enable_cluster_creator_admin_permissions = true
 
-  cluster_compute_config = {
+  compute_config = {
     enabled    = true
     node_pools = ["general-purpose", "system"]
   }
@@ -52,22 +54,30 @@ module "eks" {
   }
 }
 
-module "ingress_nginx" {
-  source = "../../iac/terraform-modules/ingress-nginx/"
+module "ingress_traefik" {
+  source = "../../iac/terraform-modules/traefik/"
 
   values = [
     <<-EOT
-    controller:
-      resources:
-        limits:
-          cpu: 100m
-          memory: 100Mi
-        requests:
-          cpu: 100m
-          memory: 100Mi
-      service:
-        annotations:
-          service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+    ports:
+      web:
+        exposedPort: 80
+        port: 80
+        protocol: TCP
+      websecure:
+        exposedPort: 443
+        port: 443
+        protocol: TCP
+    resources:
+      limits:
+        cpu: 100m
+        memory: 100Mi
+      requests:
+        cpu: 100m
+        memory: 100Mi
+    service:
+      annotations:
+        service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
     EOT
   ]
 }
