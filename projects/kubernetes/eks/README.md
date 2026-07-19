@@ -1,7 +1,7 @@
-# Terraform Amazon EKS Cluster with Ingress NGINX Controller
+# Terraform Amazon EKS Cluster with Ingress Traefik Controller
 
 ## Overview
-This project provisions AWS networking, an Amazon EKS cluster, and the NGINX Ingress Controller using Terraform.
+This project provisions AWS networking, an Amazon EKS cluster, and the Traefik Ingress Controller using Terraform.
 
 ## Security Warning
 This guide includes HTTP access checks on port 80 for validation only. Use HTTPS/TLS for production endpoints, enforce redirection from HTTP to HTTPS, and avoid exposing sensitive traffic over plain HTTP.
@@ -9,7 +9,7 @@ This guide includes HTTP access checks on port 80 for validation only. Use HTTPS
 ## Goals
 - Create a VPC with public and private subnets.
 - Provision EKS and configure access.
-- Deploy NGINX Ingress Controller through Helm.
+- Deploy Traefik Ingress Controller through Helm.
 
 ## Repository Structure
 - `main.tf`: core infrastructure and Helm resources.
@@ -49,13 +49,18 @@ aws eks update-kubeconfig --name <cluster_name>
 
 ## Validation
 ```bash
-kubectl get service --namespace=ingress-nginx
-curl http://<nlb-address>
-curl https://<nlb-address> --insecure
+kubectl get service --namespace=traefik
+
+kubectl create deployment nginx --namespace=default --image=nginx:1.29 --replicas=1
+kubectl expose deployment nginx --namespace=default --port=8080 --target-port=80
+kubectl create ingress nginx --namespace=default --class=traefik --rule="k8s-traefik-traefik-22e30c821e-d3d560fa1d4e3397.elb.eu-west-3.amazonaws.com/nginx*=nginx:8080"
+
+curl http://<nlb-address>/nginx
+curl https://<nlb-address>/nginx --insecure
 ```
 
 ## Cleanup
 ```bash
-helm uninstall ingress-nginx --namespace=ingress-nginx
+helm uninstall traefik --namespace=traefik
 terraform destroy
 ```
