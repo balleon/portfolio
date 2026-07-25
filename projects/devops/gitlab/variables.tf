@@ -3,11 +3,6 @@ variable "cluster_name" {
   description = "Name of the existing EKS cluster to deploy GitLab into."
 }
 
-variable "domain" {
-  type        = string
-  description = "Base domain used to derive GitLab hostnames (gitlab.<domain>, registry.<domain>)."
-}
-
 variable "namespace" {
   type        = string
   default     = "gitlab"
@@ -30,34 +25,4 @@ variable "db_name" {
   type        = string
   default     = "gitlabhq_production"
   description = "Database name created on the RDS PostgreSQL instance."
-}
-
-variable "db_engine_version" {
-  type        = string
-  default     = "16.4"
-  description = "PostgreSQL engine version for RDS."
-}
-
-variable "db_instance_class" {
-  type        = string
-  default     = "db.t3.medium"
-  description = "RDS instance class."
-}
-
-variable "db_allocated_storage" {
-  type        = number
-  default     = 20
-  description = "Allocated storage (GiB) for the RDS instance."
-}
-
-variable "redis_node_type" {
-  type        = string
-  default     = "cache.t3.micro"
-  description = "ElastiCache node type."
-}
-
-variable "redis_engine_version" {
-  type        = string
-  default     = "7.1"
-  description = "Redis OSS engine version for ElastiCache."
 }

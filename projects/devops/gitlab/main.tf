@@ -13,14 +13,10 @@ resource "helm_release" "gitlab" {
         edition = "ce"
 
         hosts = {
-          domain = var.domain
+          domain = data.kubernetes_service_v1.traefik.status[0].load_balancer[0].ingress[0].hostname
           https  = false
           gitlab = {
-            name  = "gitlab.${var.domain}"
-            https = false
-          }
-          registry = {
-            name  = "registry.${var.domain}"
+            name  = data.kubernetes_service_v1.traefik.status[0].load_balancer[0].ingress[0].hostname
             https = false
           }
         }
@@ -52,18 +48,6 @@ resource "helm_release" "gitlab" {
             secret = kubernetes_secret_v1.db_password.metadata[0].name
             key    = "password"
           }
-        }
-
-        redis = {
-          host = aws_elasticache_cluster.gitlab.cache_nodes[0].address
-          port = aws_elasticache_cluster.gitlab.cache_nodes[0].port
-          auth = {
-            enabled = false
-          }
-        }
-
-        registry = {
-          bucket = aws_s3_bucket.this["registry"].id
         }
 
         appConfig = {
@@ -104,9 +88,11 @@ resource "helm_release" "gitlab" {
         }
       }
 
-      # cert-manager and the chart's bundled NGINX/Traefik/Prometheus/Runner
-      # are all unused: Traefik and cert-manager (if any) already run
-      # cluster-wide, and CI runners/monitoring are out of scope for this demo.
+      # cert-manager and the chart's bundled NGINX/Traefik/Prometheus/Runner/
+      # Registry are all unused: Traefik and cert-manager (if any) already run
+      # cluster-wide, and CI runners/monitoring/registry are out of scope for
+      # this demo. redis.install is left at its default (true): Redis runs
+      # in-cluster.
       installCertmanager = false
 
       "nginx-ingress" = {
@@ -120,6 +106,9 @@ resource "helm_release" "gitlab" {
       }
       "gitlab-runner" = {
         install = false
+      }
+      registry = {
+        enabled = false
       }
 
       gitlab = {
@@ -140,7 +129,6 @@ resource "helm_release" "gitlab" {
 
   depends_on = [
     aws_db_instance.gitlab,
-    aws_elasticache_cluster.gitlab,
     kubernetes_secret_v1.db_password,
     kubernetes_secret_v1.object_storage,
     aws_iam_role_policy_attachment.gitlab_s3,

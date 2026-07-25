@@ -12,3 +12,12 @@ data "aws_eks_cluster" "this" {
 data "aws_iam_openid_connect_provider" "this" {
   url = data.aws_eks_cluster.this.identity[0].oidc[0].issuer
 }
+
+# Traefik's Service is provisioned by another project (e.g. kubernetes/eks);
+# its NLB hostname is reused as GitLab's Ingress host since no domain is owned.
+data "kubernetes_service_v1" "traefik" {
+  metadata {
+    name      = "traefik"
+    namespace = "traefik"
+  }
+}

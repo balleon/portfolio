@@ -8,7 +8,6 @@ locals {
     "terraform-state",
     "dependency-proxy",
     "backups",
-    "registry",
   ])
 }
 

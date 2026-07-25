@@ -33,10 +33,10 @@ resource "aws_db_instance" "gitlab" {
   identifier = "${var.cluster_name}-gitlab"
 
   engine         = "postgres"
-  engine_version = var.db_engine_version
+  engine_version = "16.4"
 
-  instance_class    = var.db_instance_class
-  allocated_storage = var.db_allocated_storage
+  instance_class    = "db.t3.medium"
+  allocated_storage = 20
   storage_type      = "gp3"
 
   db_name  = var.db_name
@@ -50,9 +50,7 @@ resource "aws_db_instance" "gitlab" {
   # Single-AZ, no deletion protection: this is a demo/portfolio deployment,
   # not tuned for production availability guarantees.
   multi_az                = false
-  publicly_accessible     = false
   backup_retention_period = 1
   apply_immediately       = true
   skip_final_snapshot     = true
-  deletion_protection     = false
 }
