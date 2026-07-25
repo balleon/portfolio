@@ -1,63 +1,55 @@
 # GitLab on EKS with RDS and S3
 
 ## Overview
-This project deploys [GitLab](https://gitlab.com/gitlab-org/charts/gitlab) (Helm chart `10.2.0`) onto an existing EKS cluster via Terraform. The database is backed by a managed RDS PostgreSQL instance, object storage uses a set of S3 buckets (artifacts, uploads, LFS, packages, backups, etc.), and Redis stays as the chart's bundled, in-cluster subchart. GitLab is served on the hostname of the cluster's existing Traefik NLB — no owned domain required.
+This project deploys [GitLab](https://gitlab.com/gitlab-org/charts/gitlab) (Helm chart `10.2.0`) onto an existing EKS cluster using Terraform. It assumes the cluster (e.g. `kubernetes/eks`) already has the AWS Load Balancer Controller, Traefik and the EBS CSI driver installed, and reuses Traefik's existing NLB hostname as GitLab's Ingress host — no owned domain required. PostgreSQL runs on a managed RDS instance, Redis runs as a separate, minimal Helm release in-cluster, and object storage uses a set of S3 buckets reached via IRSA.
 
-It assumes an EKS cluster already exists (e.g. `kubernetes/eks`) with the AWS Load Balancer Controller, Traefik, and the EBS CSI driver already installed. This project does not create the cluster, install an ingress controller, or provision storage classes — it only adds GitLab and its data-plane dependencies on top.
+GitLab is exposed over plain HTTP for testing purposes only; this is not recommended for production use.
 
-This project uses HTTP for demonstration purposes only and is not intended for production use.
+## Security Warning
+- Ingress is plain HTTP (`global.hosts.gitlab.https: false`) — a demo simplification, not suitable for production. Without an owned domain there's no name to issue a publicly-trusted TLS certificate for, so HTTPS isn't available here.
+- RDS is single-AZ with `skip_final_snapshot = true` and no deletion protection, and Redis runs as a single, unclustered instance — sized for demo traffic, not production.
 
 ## Goals
 - Deploy GitLab CE via the official Helm chart, routed through the cluster's existing Traefik ingress controller.
-- Replace the chart's bundled PostgreSQL with an RDS instance; leave the chart's bundled Redis subchart in place.
+- Replace the chart's bundled PostgreSQL with an RDS instance, and deploy Redis as a separate, minimal in-cluster release (the chart dropped its own bundled Redis subchart in v10.0.0).
 - Use S3 for GitLab's object storage (LFS, artifacts, uploads, packages, external diffs, Terraform state, dependency proxy, backups) via IRSA — no static AWS credentials.
+- Set explicit CPU/memory requests and limits for every deployed component.
 
-The container registry subchart is disabled (`registry.enabled: false`) — out of scope for this demo.
-
-## Architecture
-```
-EKS cluster (existing)
-  ├── Traefik (existing, cluster-wide ingress, fronted by an NLB)
-  │     ◄── Ingress: <traefik-nlb-hostname> (read via data.kubernetes_service_v1.traefik)
-  │
-  └── namespace: gitlab
-        ├── webservice / sidekiq / gitaly / toolbox
-        │     ├── ServiceAccount (IRSA) ──► IAM role ──► S3 buckets
-        │     └── ── psql (global.psql) ──────────────► RDS PostgreSQL
-        ├── redis (bundled subchart, in-cluster, PVC via existing StorageClass)
-        └── Secrets: gitlab-postgresql-password, gitlab-rails-storage
-
-AWS
-  ├── RDS PostgreSQL      (private subnets of the EKS VPC)
-  ├── S3 buckets          (artifacts, uploads, lfs, packages, external-diffs,
-  │                        terraform-state, dependency-proxy, backups)
-  └── IAM role (IRSA)     assumable by system:serviceaccount:gitlab:gitlab
-```
-
-The RDS security group only allows inbound traffic from the EKS cluster's security group (`data.aws_eks_cluster.this.vpc_config[0].cluster_security_group_id`), and the instance is placed in the same private subnets as the cluster.
+The container registry and GitLab Runner are disabled/out of scope — GitLab Runner is deployed by a separate Terraform stack.
 
 ## Repository Structure
 - `data.tf`: lookups against the existing EKS cluster (VPC, subnets, security group, OIDC provider) and Traefik's Service (NLB hostname).
 - `rds.tf`: RDS PostgreSQL instance, subnet group and security group.
+- `redis.tf`: standalone, in-cluster Redis Helm release.
 - `s3.tf`: S3 buckets and the IAM role/policy (IRSA) GitLab uses to reach them.
-- `kubernetes.tf`: namespace and the two secrets GitLab reads (DB password, object storage connection).
-- `main.tf`: the `helm_release` for GitLab, with its values built as an HCL map and passed via `yamlencode()` — external psql/object storage, ingress, disabled bundled subcharts (Redis stays enabled).
+- `kubernetes.tf`: namespace, the shared ServiceAccount, and the secrets GitLab reads (DB password, Redis password, object storage connection).
+- `main.tf`: the `helm_release` for GitLab, with its values built as an HCL map and passed via `yamlencode()`.
 - `outputs.tf` / `variables.tf` / `providers.tf` / `versions.tf`: Terraform plumbing.
 
 ## Prerequisites
-- An existing EKS cluster with the AWS Load Balancer Controller, Traefik and the EBS CSI driver deployed, and a default `StorageClass` backed by it (Gitaly and the bundled Redis subchart both need a PVC).
-- `terraform`, `aws` CLI (used by the `exec`-based Kubernes/Helm provider auth via `aws eks get-token`), `kubectl`.
+- An existing EKS cluster with the AWS Load Balancer Controller, Traefik and the EBS CSI driver deployed, and a default `StorageClass` backed by it (Gitaly and Redis both need a PVC).
+- AWS account with permissions to create RDS, S3, IAM and Kubernetes resources
+- S3 bucket for Terraform state
+- `terraform`
+- `aws`
+- `kubectl`
 - No domain required — GitLab is reached at the hostname of Traefik's existing NLB Service, read via `data.kubernetes_service_v1.traefik`.
-- IAM permissions to create RDS, S3, IAM and Kubernetes resources.
 
-## Deployment
-### 1) Initialize
+## Usage
+### 1) Initialize Terraform backend
 ```bash
+export AWS_ACCESS_KEY_ID=<REDACTED>
+export AWS_SECRET_ACCESS_KEY=<REDACTED>
+export AWS_REGION=<REDACTED>
 export TF_VAR_cluster_name=<eks-cluster-name>
-terraform init
+
+terraform init \
+-backend-config="bucket=<REDACTED>" \
+-backend-config="key=state/terraform.tfstate" \
+-backend-config="region=${AWS_REGION}"
 ```
 
-### 2) Deploy
+### 2) Deploy GitLab
 ```bash
 terraform apply
 ```
@@ -70,12 +62,12 @@ terraform output gitlab_url
 
 ## Validation
 ```bash
-kubectl get pods -n gitlab
+kubectl get pods --namespace=gitlab
 ```
 
 Retrieve the initial `root` password:
 ```bash
-kubectl get secret -n gitlab gitlab-gitlab-initial-root-password -o jsonpath='{.data.password}' | base64 --decode
+kubectl get secret --namespace=gitlab gitlab-gitlab-initial-root-password -o jsonpath='{.data.password}' | base64 --decode
 ```
 
 Browse to `$(terraform output -raw gitlab_url)` and sign in as `root`. Confirm object storage is wired up by uploading an attachment/avatar and checking the corresponding S3 bucket:
@@ -83,10 +75,6 @@ Browse to `$(terraform output -raw gitlab_url)` and sign in as `root`. Confirm o
 terraform output s3_buckets
 aws s3 ls "s3://$(terraform output -json s3_buckets | jq -r .uploads)"
 ```
-
-## Security Warning
-- Ingress is plain HTTP (`global.hosts.gitlab.https: false`) — a demo simplification, not suitable for production. Without an owned domain there's no name to issue a publicly-trusted TLS certificate for, so HTTPS isn't available here.
-- RDS is single-AZ with `skip_final_snapshot = true` and no deletion protection, to keep `terraform destroy` clean for a demo. The bundled Redis subchart also runs as a single, unclustered instance.
 
 ## Cleanup
 ```bash
