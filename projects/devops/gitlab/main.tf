@@ -13,6 +13,7 @@ resource "helm_release" "gitlab" {
       global = {
         edition = "ce"
 
+        # https://docs.gitlab.com/charts/charts/globals/#hostsuffix
         hosts = {
           domain = data.kubernetes_service_v1.traefik.status[0].load_balancer[0].ingress[0].hostname
           https  = false
@@ -22,12 +23,14 @@ resource "helm_release" "gitlab" {
           }
         }
 
+        # https://docs.gitlab.com/charts/advanced/gateway-api/
         gatewayApi = {
           enabled              = false
           installEnvoy         = false
           configureCertmanager = false
         }
 
+        # https://docs.gitlab.com/charts/charts/globals/#configure-ingress-settings
         ingress = {
           enabled              = true
           configureCertmanager = false
@@ -37,14 +40,14 @@ resource "helm_release" "gitlab" {
           }
         }
 
-        # create = false: the ServiceAccount is managed outside the chart -
-        # see kubernetes_service_account_v1.gitlab in kubernetes.tf.
+        # https://docs.gitlab.com/charts/charts/globals/#service-accounts
         serviceAccount = {
           enabled = true
           create  = false
           name    = kubernetes_service_account_v1.gitlab.metadata[0].name
         }
 
+        # https://docs.gitlab.com/charts/advanced/external-redis/#configure-the-chart
         redis = {
           host = "redis-master.${kubernetes_namespace_v1.gitlab.metadata[0].name}.svc.cluster.local"
           auth = {
@@ -54,6 +57,7 @@ resource "helm_release" "gitlab" {
           }
         }
 
+        # https://docs.gitlab.com/charts/advanced/external-db/
         psql = {
           host     = aws_db_instance.gitlab.address
           port     = aws_db_instance.gitlab.port
@@ -65,6 +69,7 @@ resource "helm_release" "gitlab" {
           }
         }
 
+        # https://docs.gitlab.com/charts/charts/globals/#configure-appconfig-settings
         appConfig = {
           object_store = {
             enabled = true
@@ -125,9 +130,69 @@ resource "helm_release" "gitlab" {
         enabled = false
       }
 
+      # Resources sized for demo traffic on a small cluster, not production.
       gitlab = {
+        webservice = {
+          resources = {
+            requests = { cpu = "300m", memory = "2Gi" }
+            limits   = { cpu = "1", memory = "3Gi" }
+          }
+          workhorse = {
+            resources = {
+              requests = { cpu = "100m", memory = "100Mi" }
+              limits   = { cpu = "300m", memory = "300Mi" }
+            }
+          }
+        }
+
+        sidekiq = {
+          resources = {
+            requests = { cpu = "300m", memory = "1.5Gi" }
+            limits   = { cpu = "900m", memory = "3Gi" }
+          }
+        }
+
+        gitaly = {
+          resources = {
+            requests = { cpu = "100m", memory = "256Mi" }
+            limits   = { cpu = "500m", memory = "1Gi" }
+          }
+        }
+
+        "gitlab-shell" = {
+          resources = {
+            requests = { cpu = "50m", memory = "64Mi" }
+            limits   = { cpu = "200m", memory = "128Mi" }
+          }
+        }
+
+        kas = {
+          resources = {
+            requests = { cpu = "100m", memory = "256Mi" }
+            limits   = { cpu = "300m", memory = "512Mi" }
+          }
+        }
+
+        "gitlab-exporter" = {
+          resources = {
+            requests = { cpu = "75m", memory = "100Mi" }
+            limits   = { cpu = "200m", memory = "200Mi" }
+          }
+        }
+
+        migrations = {
+          resources = {
+            requests = { cpu = "500m", memory = "500Mi" }
+            limits   = { cpu = "1", memory = "1Gi" }
+          }
+        }
+
         # https://docs.gitlab.com/charts/charts/gitlab/toolbox/
         toolbox = {
+          resources = {
+            requests = { cpu = "50m", memory = "350Mi" }
+            limits   = { cpu = "500m", memory = "1Gi" }
+          }
           backups = {
             objectStorage = {
               backend = "s3"
