@@ -23,7 +23,6 @@ resource "helm_release" "gitlab" {
 
         ingress = {
           enabled              = true
-          configureCertmanager = false
           class                = "traefik"
           tls = {
             enabled = false
@@ -32,7 +31,6 @@ resource "helm_release" "gitlab" {
 
         serviceAccount = {
           enabled = true
-          create  = true
           name    = var.service_account_name
           annotations = {
             "eks.amazonaws.com/role-arn" = aws_iam_role.gitlab.arn
@@ -95,12 +93,6 @@ resource "helm_release" "gitlab" {
       # in-cluster.
       installCertmanager = false
 
-      "nginx-ingress" = {
-        enabled = false
-      }
-      traefik = {
-        install = false
-      }
       prometheus = {
         install = false
       }
