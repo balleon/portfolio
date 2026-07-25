@@ -12,8 +12,3 @@ output "s3_buckets" {
   value       = { for k, b in aws_s3_bucket.this : k => b.id }
   description = "S3 buckets created for GitLab object storage."
 }
-
-output "irsa_role_arn" {
-  value       = aws_iam_role.gitlab.arn
-  description = "IAM role ARN assumed by the GitLab ServiceAccount for S3 access."
-}
