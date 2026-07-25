@@ -108,10 +108,6 @@ resource "helm_release" "gitlab" {
         }
       }
 
-      # cert-manager and the chart's bundled NGINX/Traefik/Prometheus/Runner/
-      # Registry are all unused: Traefik and cert-manager already run
-      # cluster-wide, and CI runners/monitoring/registry are out of scope for
-      # this demo. Redis is deployed separately - see redis.tf.
       installCertmanager = false
 
       "nginx-ingress" = {
@@ -130,12 +126,18 @@ resource "helm_release" "gitlab" {
         enabled = false
       }
 
-      # Resources sized for demo traffic on a small cluster, not production.
+      # Fixed single replica (min = max) for every component with an
+      # HPA-driven or static replica count - demo traffic doesn't need
+      # autoscaling. gitaly and gitlab-exporter have no such value: gitaly
+      # replicates per named node rather than by scalar count, and
+      # gitlab-exporter's replica count is hardcoded to 1 by the chart.
       gitlab = {
         webservice = {
+          minReplicas = 1
+          maxReplicas = 1
           resources = {
-            requests = { cpu = "300m", memory = "2Gi" }
-            limits   = { cpu = "1", memory = "3Gi" }
+            requests = { cpu = "1", memory = "2Gi" }
+            limits   = { cpu = "2", memory = "3Gi" }
           }
           workhorse = {
             resources = {
@@ -146,6 +148,8 @@ resource "helm_release" "gitlab" {
         }
 
         sidekiq = {
+          minReplicas = 1
+          maxReplicas = 1
           resources = {
             requests = { cpu = "300m", memory = "1.5Gi" }
             limits   = { cpu = "900m", memory = "3Gi" }
@@ -160,6 +164,8 @@ resource "helm_release" "gitlab" {
         }
 
         "gitlab-shell" = {
+          minReplicas = 1
+          maxReplicas = 1
           resources = {
             requests = { cpu = "50m", memory = "64Mi" }
             limits   = { cpu = "200m", memory = "128Mi" }
@@ -167,6 +173,8 @@ resource "helm_release" "gitlab" {
         }
 
         kas = {
+          minReplicas = 1
+          maxReplicas = 1
           resources = {
             requests = { cpu = "100m", memory = "256Mi" }
             limits   = { cpu = "300m", memory = "512Mi" }
@@ -189,6 +197,7 @@ resource "helm_release" "gitlab" {
 
         # https://docs.gitlab.com/charts/charts/gitlab/toolbox/
         toolbox = {
+          replicas = 1
           resources = {
             requests = { cpu = "50m", memory = "350Mi" }
             limits   = { cpu = "500m", memory = "1Gi" }

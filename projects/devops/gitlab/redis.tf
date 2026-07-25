@@ -3,9 +3,6 @@ resource "random_password" "redis" {
   special = false
 }
 
-# The GitLab chart dropped its bundled Redis subchart in v10.0.0, so Redis is
-# deployed here as a separate, minimal, standalone (single-node) release and
-# wired into GitLab via global.redis in main.tf.
 resource "helm_release" "redis" {
   name       = "redis"
   repository = "https://charts.bitnami.com/bitnami"

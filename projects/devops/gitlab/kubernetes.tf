@@ -4,10 +4,6 @@ resource "kubernetes_namespace_v1" "gitlab" {
   }
 }
 
-# global.serviceAccount.create must be false in the Helm values: the chart
-# refuses to let every subchart (webservice/sidekiq/gitaly/toolbox/...)
-# create its own ServiceAccount under the same shared, custom name, so this
-# single object is created here instead and shared across all of them.
 resource "kubernetes_service_account_v1" "gitlab" {
   metadata {
     name      = "gitlab"
@@ -40,10 +36,6 @@ resource "kubernetes_secret_v1" "redis_password" {
   }
 }
 
-# Consolidated object storage connection, shared by every S3-backed GitLab
-# component (lfs/artifacts/uploads/packages/... and the toolbox backups).
-# use_iam_profile lets each pod authenticate via the IRSA role instead of
-# static access keys - see aws_iam_role.gitlab in s3.tf.
 resource "kubernetes_secret_v1" "object_storage" {
   metadata {
     name      = "gitlab-rails-storage"

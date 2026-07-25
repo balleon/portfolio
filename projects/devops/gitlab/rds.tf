@@ -47,8 +47,6 @@ resource "aws_db_instance" "gitlab" {
   db_subnet_group_name   = aws_db_subnet_group.gitlab.name
   vpc_security_group_ids = [aws_security_group.db.id]
 
-  # Single-AZ, no deletion protection: this is a demo/portfolio deployment,
-  # not tuned for production availability guarantees.
   multi_az                = false
   backup_retention_period = 1
   apply_immediately       = true
