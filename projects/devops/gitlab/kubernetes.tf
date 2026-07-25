@@ -4,6 +4,20 @@ resource "kubernetes_namespace_v1" "gitlab" {
   }
 }
 
+# global.serviceAccount.create must be false in the Helm values: the chart
+# refuses to let every subchart (webservice/sidekiq/gitaly/toolbox/...)
+# create its own ServiceAccount under the same shared, custom name, so this
+# single object is created here instead and shared across all of them.
+resource "kubernetes_service_account_v1" "gitlab" {
+  metadata {
+    name      = "gitlab"
+    namespace = kubernetes_namespace_v1.gitlab.metadata[0].name
+    annotations = {
+      "eks.amazonaws.com/role-arn" = aws_iam_role.gitlab.arn
+    }
+  }
+}
+
 resource "kubernetes_secret_v1" "db_password" {
   metadata {
     name      = "gitlab-postgresql-password"
@@ -12,6 +26,17 @@ resource "kubernetes_secret_v1" "db_password" {
 
   data = {
     password = random_password.db.result
+  }
+}
+
+resource "kubernetes_secret_v1" "redis_password" {
+  metadata {
+    name      = "gitlab-redis-password"
+    namespace = kubernetes_namespace_v1.gitlab.metadata[0].name
+  }
+
+  data = {
+    password = random_password.redis.result
   }
 }
 

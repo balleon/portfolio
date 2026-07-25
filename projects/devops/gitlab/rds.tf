@@ -33,9 +33,9 @@ resource "aws_db_instance" "gitlab" {
   identifier = "${var.cluster_name}-gitlab"
 
   engine         = "postgres"
-  engine_version = "16.4"
+  engine_version = "17.10"
 
-  instance_class    = "db.t3.medium"
+  instance_class    = "db.t3.micro"
   allocated_storage = 20
   storage_type      = "gp3"
 

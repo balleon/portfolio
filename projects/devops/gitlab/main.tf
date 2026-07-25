@@ -9,6 +9,7 @@ resource "helm_release" "gitlab" {
   # https://docs.gitlab.com/charts/charts/globals.html
   values = [
     yamlencode({
+      # https://docs.gitlab.com/charts/charts/globals/
       global = {
         edition = "ce"
 
@@ -21,19 +22,35 @@ resource "helm_release" "gitlab" {
           }
         }
 
+        gatewayApi = {
+          enabled              = false
+          installEnvoy         = false
+          configureCertmanager = false
+        }
+
         ingress = {
           enabled              = true
+          configureCertmanager = false
           class                = "traefik"
           tls = {
             enabled = false
           }
         }
 
+        # create = false: the ServiceAccount is managed outside the chart -
+        # see kubernetes_service_account_v1.gitlab in kubernetes.tf.
         serviceAccount = {
           enabled = true
-          name    = var.service_account_name
-          annotations = {
-            "eks.amazonaws.com/role-arn" = aws_iam_role.gitlab.arn
+          create  = false
+          name    = kubernetes_service_account_v1.gitlab.metadata[0].name
+        }
+
+        redis = {
+          host = "redis-master.${kubernetes_namespace_v1.gitlab.metadata[0].name}.svc.cluster.local"
+          auth = {
+            enabled = true
+            secret  = kubernetes_secret_v1.redis_password.metadata[0].name
+            key     = "password"
           }
         }
 
@@ -87,12 +104,17 @@ resource "helm_release" "gitlab" {
       }
 
       # cert-manager and the chart's bundled NGINX/Traefik/Prometheus/Runner/
-      # Registry are all unused: Traefik and cert-manager (if any) already run
+      # Registry are all unused: Traefik and cert-manager already run
       # cluster-wide, and CI runners/monitoring/registry are out of scope for
-      # this demo. redis.install is left at its default (true): Redis runs
-      # in-cluster.
+      # this demo. Redis is deployed separately - see redis.tf.
       installCertmanager = false
 
+      "nginx-ingress" = {
+        enabled = false
+      }
+      traefik = {
+        install = false
+      }
       prometheus = {
         install = false
       }
@@ -104,6 +126,7 @@ resource "helm_release" "gitlab" {
       }
 
       gitlab = {
+        # https://docs.gitlab.com/charts/charts/gitlab/toolbox/
         toolbox = {
           backups = {
             objectStorage = {
@@ -121,6 +144,8 @@ resource "helm_release" "gitlab" {
 
   depends_on = [
     aws_db_instance.gitlab,
+    helm_release.redis,
+    kubernetes_service_account_v1.gitlab,
     kubernetes_secret_v1.db_password,
     kubernetes_secret_v1.object_storage,
     aws_iam_role_policy_attachment.gitlab_s3,

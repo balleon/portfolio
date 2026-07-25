@@ -34,7 +34,8 @@ resource "aws_s3_bucket_public_access_block" "this" {
 }
 
 # IRSA role assumed by the GitLab ServiceAccount so pods reach S3 without
-# static access keys. Trust is scoped to the ServiceAccount's namespace/name.
+# static access keys. Trust is scoped to the ServiceAccount's namespace/name -
+# see kubernetes_service_account_v1.gitlab in kubernetes.tf.
 data "aws_iam_policy_document" "gitlab_irsa_trust" {
   statement {
     effect  = "Allow"
@@ -48,7 +49,7 @@ data "aws_iam_policy_document" "gitlab_irsa_trust" {
     condition {
       test     = "StringEquals"
       variable = "${replace(data.aws_iam_openid_connect_provider.this.url, "https://", "")}:sub"
-      values   = ["system:serviceaccount:${var.namespace}:${var.service_account_name}"]
+      values   = ["system:serviceaccount:${var.namespace}:gitlab"]
     }
 
     condition {
