@@ -10,6 +10,7 @@ This guide includes HTTP access checks on port 80 for validation only. Use HTTPS
 - Create a VPC with public and private subnets.
 - Provision EKS and configure access.
 - Deploy Traefik Ingress Controller through Helm.
+- Create Kubernetes StorageClass for EKS Auto Mode.
 
 ## Repository Structure
 - `main.tf`: core infrastructure and Helm resources.

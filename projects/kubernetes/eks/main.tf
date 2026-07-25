@@ -36,6 +36,10 @@ module "eks" {
 
   kubernetes_version = "1.36"
 
+  addons = {
+    metrics-server = {}
+  }
+
   endpoint_public_access = true
 
   enable_cluster_creator_admin_permissions = true
@@ -80,4 +84,21 @@ module "ingress_traefik" {
         service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
     EOT
   ]
+}
+
+resource "kubernetes_storage_class_v1" "gp3_for_auto_mode" {
+  metadata {
+    name = "gp3-for-auto-mode"
+    annotations = {
+      "storageclass.kubernetes.io/is-default-class" = "true"
+    }
+  }
+
+  storage_provisioner = "ebs.csi.eks.amazonaws.com"
+  volume_binding_mode = "WaitForFirstConsumer"
+
+  parameters = {
+    type      = "gp3"
+    encrypted = "true"
+  }
 }
