@@ -1,0 +1,16 @@
+apiVersion: balleon.local/v1alpha1
+kind: EnvironmentProvisioner
+metadata:
+  labels:
+    app.kubernetes.io/name: environment-provisioner-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: environmentprovisioner-sample
+spec:
+  namespaceName: test
+  resourcesQuota:
+    limits:
+      cpu: "2"
+      memory: 1Gi
+    request:
+      cpu: "1"
+      memory: 1Gi
