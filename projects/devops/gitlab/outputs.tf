@@ -8,6 +8,11 @@ output "rds_endpoint" {
   description = "RDS PostgreSQL endpoint used as global.psql.host."
 }
 
+output "redis_endpoint" {
+  value       = aws_elasticache_replication_group.gitlab.primary_endpoint_address
+  description = "ElastiCache Redis endpoint used as global.redis.host."
+}
+
 output "s3_buckets" {
   value       = { for k, b in aws_s3_bucket.this : k => b.id }
   description = "S3 buckets created for GitLab object storage."
