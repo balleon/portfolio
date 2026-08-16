@@ -38,7 +38,7 @@ I am targeting roles as:
 |---|---|---|
 | [GitOps with Argo CD](./projects/devops/argo-cd/) | Delivers repeatable application deployments through declarative GitOps workflows. | Argo CD, Helmfile, Kubernetes |
 | [GitHub Runner on Kubernetes](./projects/devops/github-runner-kubernetes/) | Enables scalable self-hosted CI execution on Kubernetes for delivery pipelines. | Terraform, GitHub Actions Runner Controller, Helm, Kubernetes |
-| [GitLab on EKS](./projects/devops/gitlab/) | Deploys a self-managed GitLab instance on EKS with external RDS/S3 and an in-cluster Redis release, reached without an owned domain. | Terraform, Helm, AWS EKS, RDS, S3, IRSA |
+| [GitLab on EKS](./projects/devops/gitlab/) | Deploys a self-managed GitLab instance on EKS with external RDS/ElastiCache/S3 and an in-stack GitLab Runner, reached without an owned domain. | Terraform, Helm, AWS EKS, RDS, ElastiCache, S3, IRSA |
 | [Kubernetes Policy Enforcement](./projects/devsecops/kyverno-policies/) | Enforces security and governance guardrails with Kubernetes-native policy-as-code. | Kyverno, Kubernetes |
 | [HTTP Server on Kubernetes (Go)](./projects/golang/http-server-kubernetes/) | Deploys a containerized Go service with production-style Kubernetes networking. | Go, Docker, Kubernetes, Ingress |
 | [Kubernetes Operator (Go)](./projects/golang/kubernetes-operator/) | Extends Kubernetes with a custom controller to reconcile application resources declaratively. | Go, Kubebuilder, controller-runtime, Kubernetes |

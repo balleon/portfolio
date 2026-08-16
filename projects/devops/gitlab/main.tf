@@ -49,7 +49,9 @@ resource "helm_release" "gitlab" {
 
         # https://docs.gitlab.com/charts/advanced/external-redis/#configure-the-chart
         redis = {
-          host = "redis-master.${kubernetes_namespace_v1.gitlab.metadata[0].name}.svc.cluster.local"
+          host   = aws_elasticache_replication_group.gitlab.primary_endpoint_address
+          port   = aws_elasticache_replication_group.gitlab.port
+          scheme = "rediss"
           auth = {
             enabled = true
             secret  = kubernetes_secret_v1.redis_password.metadata[0].name
@@ -218,7 +220,7 @@ resource "helm_release" "gitlab" {
 
   depends_on = [
     aws_db_instance.gitlab,
-    helm_release.redis,
+    aws_elasticache_replication_group.gitlab,
     kubernetes_service_account_v1.gitlab,
     kubernetes_secret_v1.db_password,
     kubernetes_secret_v1.object_storage,

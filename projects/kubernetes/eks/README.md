@@ -34,7 +34,7 @@ export AWS_REGION=<REDACTED>
 
 terraform init \
 -backend-config="bucket=<REDACTED>" \
--backend-config="key=state/terraform.tfstate" \
+-backend-config="key=state/$(basename $(pwd))/terraform.tfstate" \
 -backend-config="region=${AWS_REGION}"
 ```
 
