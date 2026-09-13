@@ -1,48 +1,27 @@
-# Kubernetes Operator
+# Environment Provisioner Operator
 
-## Overview
-This folder is the entrypoint documentation for the Kubernetes operator project, implemented in the `app-operator/` subdirectory.
+A Kubernetes operator built with [Kubebuilder](https://book.kubebuilder.io/) that provisions a `Namespace` and a `ResourceQuota` from a single custom resource.
 
-## Goals
-- Describe the purpose and capabilities of the operator.
-- Point to the operator implementation location.
-- Provide standard local and cluster workflows.
+## Initialization
 
-## Repository Structure
-- `app-operator/`: Kubebuilder-based operator project.
-
-## Prerequisites
-- Go `1.22+`
-- Docker (or compatible OCI runtime)
-- `kubectl` configured to a Kubernetes cluster
-- `make`
-
-## Usage
-### 1) Move into operator project
 ```bash
-cd app-operator
+mkdir environment-provisioner-operator && cd environment-provisioner-operator
+
+kubebuilder init --domain=balleon.local --repo=github.com/balleon/portfolio/environment-provisioner-operator
+kubebuilder create api --version=v1alpha1 --kind=EnvironmentProvisioner --namespaced=false --resource=true --controller=true
 ```
 
-### 2) Run locally
-```bash
-make install
-make run
-```
+## Implementation
 
-### 3) Deploy in cluster
-```bash
-make docker-build docker-push IMG=<registry>/app-operator:<tag>
-make deploy IMG=<registry>/app-operator:<tag>
-```
+See [environment-provisioner-operator/CHANGES.md](environment-provisioner-operator/CHANGES.md) for a description of the types, reconcile logic, drift detection, and deletion behaviour.
 
-## Validation
+## Apply
 ```bash
-kubectl get crd apps.apps.test.local
-kubectl get pods --namespace=default
-```
+make manifests
 
-## Cleanup
-```bash
-make undeploy
-make uninstall
+kubectl apply -f config/crd/bases/balleon.local_environmentprovisioners.yaml
+
+go run cmd/main.go
+
+kubectl apply -f config/samples/v1alpha1_environmentprovisioner.yaml
 ```
