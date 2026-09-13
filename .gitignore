@@ -1,7 +1,7 @@
 # Local .terraform directories
 **/.terraform/*
 
-# Reusable Terraform modules don't pin provider versions for consumers
+# Lock files belong to root modules, not to reusable child modules
 projects/iac/terraform-modules/**/.terraform.lock.hcl
 
 # .tfstate files
