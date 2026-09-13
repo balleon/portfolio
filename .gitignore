@@ -36,3 +36,6 @@ terraform.rc
 venv/
 __pycache__/
 Pulumi.*.yaml
+
+# Claude Code
+CLAUDE.md
