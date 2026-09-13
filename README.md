@@ -9,6 +9,8 @@ I am targeting roles as:
 - **Platform Engineer**
 - **DevOps Engineer**
 
+**LinkedIn:** [linkedin.com/in/balducci-adrien](https://www.linkedin.com/in/balducci-adrien/)
+
 ---
 
 ## Table of Contents
