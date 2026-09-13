@@ -52,12 +52,14 @@ aws eks update-kubeconfig --name <cluster_name>
 ```bash
 kubectl get service --namespace=traefik
 
+export NLB_ADDRESS=$(kubectl get service traefik --namespace=traefik --output=jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+
 kubectl create deployment nginx --namespace=default --image=nginx:1.29 --replicas=1
 kubectl expose deployment nginx --namespace=default --port=8080 --target-port=80
-kubectl create ingress nginx --namespace=default --class=traefik --rule="k8s-traefik-traefik-22e30c821e-d3d560fa1d4e3397.elb.eu-west-3.amazonaws.com/nginx*=nginx:8080"
+kubectl create ingress nginx --namespace=default --class=traefik --rule="${NLB_ADDRESS}/nginx*=nginx:8080"
 
-curl http://<nlb-address>/nginx
-curl https://<nlb-address>/nginx --insecure
+curl http://${NLB_ADDRESS}/nginx
+curl https://${NLB_ADDRESS}/nginx --insecure
 ```
 
 ## Cleanup
