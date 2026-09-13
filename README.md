@@ -23,12 +23,14 @@ I am targeting roles as:
 
 ## Skills & Tools
 
-**Cloud & Infrastructure:** AWS, VPC, EKS, Network Load Balancer  
-**Containers & Orchestration:** Docker, Kubernetes, k3d, NGINX Ingress  
-**IaC & GitOps:** Terraform, Helm, Helmfile, Argo CD  
+**Cloud & Infrastructure:** AWS, VPC, EKS, RDS, ElastiCache, S3, IAM/IRSA, Network Load Balancer  
+**Containers & Orchestration:** Docker, Kubernetes, k3d, NGINX Ingress, Traefik, Gateway API  
+**IaC & GitOps:** Terraform, Pulumi, Helm, Helmfile, Argo CD  
 **Observability:** Prometheus, Alertmanager, Grafana, Loki, Promtail, Tempo, OpenTelemetry  
-**CI/CD & Automation:** GitHub Actions, self-hosted runners, scripting  
-**Programming:** Go, Python
+**CI/CD & Automation:** GitHub Actions, GitHub Actions Runner Controller, GitLab CI/CD, self-hosted runners, scripting  
+**Security & Policy:** Kyverno, Kubernetes admission control, policy-as-code  
+**AI Ops:** kagent, Ollama  
+**Programming:** Go (client-go, Kubebuilder, controller-runtime), Python
 
 ---
 
@@ -41,11 +43,12 @@ I am targeting roles as:
 | [GitLab on EKS](./projects/devops/gitlab/) | Deploys a self-managed GitLab instance on EKS with external RDS/ElastiCache/S3 and an in-stack GitLab Runner, reached without an owned domain. | Terraform, Helm, AWS EKS, RDS, ElastiCache, S3, IRSA |
 | [Kubernetes Policy Enforcement](./projects/devsecops/kyverno-policies/) | Enforces security and governance guardrails with Kubernetes-native policy-as-code. | Kyverno, Kubernetes |
 | [HTTP Server on Kubernetes (Go)](./projects/golang/http-server-kubernetes/) | Deploys a containerized Go service with production-style Kubernetes networking. | Go, Docker, Kubernetes, Ingress |
+| [Kubernetes API Server IP (Go)](./projects/golang/kubernetes-api-server-ip/) | Discovers the Kubernetes API server endpoint IP using the client-go library for cluster diagnostics. | Go, client-go, Kubernetes API |
 | [Kubernetes Operator (Go)](./projects/golang/kubernetes-operator/) | Extends Kubernetes with a custom controller to reconcile application resources declaratively. | Go, Kubebuilder, controller-runtime, Kubernetes |
 | [Unused Secret Detector (Go)](./projects/golang/unused-secret/) | Improves cluster security posture by detecting and reporting unused Kubernetes Secrets. | Go, client-go, Kubernetes API |
 | [Terraform Module: Ingress NGINX](./projects/iac/terraform-modules/ingress-nginx/) | Standardizes ingress provisioning with a reusable Terraform module pattern. | Terraform, Helm, Kubernetes |
 | [Terraform Module: Traefik](./projects/iac/terraform-modules/traefik/) | Standardizes Traefik ingress controller provisioning with a reusable Terraform module pattern. | Terraform, Helm, Kubernetes |
-| [AWS EKS with Terraform](./projects/kubernetes/eks/) | Provisions an AWS EKS platform foundation using infrastructure as code. | Terraform, AWS EKS, Helm, NGINX Ingress |
+| [AWS EKS with Terraform](./projects/kubernetes/eks/) | Provisions an AWS EKS platform foundation using infrastructure as code. | Terraform, AWS EKS, Helm, Traefik |
 | [AWS EKS with Pulumi (Python)](./projects/python/pulumi-eks/) | Provisions AWS VPC, subnets, and EKS cluster using Pulumi infrastructure as code in Python. | Pulumi, Python, AWS EKS, Infrastructure as Code |
 | [Gateway API with Traefik](./projects/kubernetes/gateway-api/) | Exposes Kubernetes services through Gateway API resources managed by a Traefik controller. | Kubernetes Gateway API, Traefik, NGINX |
 | [AI SRE: OOMKilled Remediation with kagent + Ollama](./projects/kubernetes/kagent-ollama-oomkilled/) | Automates Kubernetes incident diagnosis for OOMKilled pods using kagent with a local Ollama LLM. | Kubernetes, Helm, kagent, Ollama, AI Ops |
