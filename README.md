@@ -44,6 +44,7 @@ I am targeting roles as:
 | [GitHub Runner on Kubernetes](./projects/devops/github-runner-kubernetes/) | Enables scalable self-hosted CI execution on Kubernetes for delivery pipelines. | Terraform, GitHub Actions Runner Controller, Helm, Kubernetes |
 | [GitLab on EKS](./projects/devops/gitlab/) | Deploys a self-managed GitLab instance on EKS with external RDS/ElastiCache/S3 and an in-stack GitLab Runner, reached without an owned domain. | Terraform, Helm, AWS EKS, RDS, ElastiCache, S3, IRSA |
 | [Kubernetes Policy Enforcement](./projects/devsecops/kyverno-policies/) | Enforces security and governance guardrails with Kubernetes-native policy-as-code. | Kyverno, Kubernetes |
+| [Strict mTLS with Istio](./projects/devsecops/istio-mtls/) | Enforces zero-trust service-to-service encryption with a service mesh, without changing application code. | Istio, Kubernetes |
 | [HTTP Server on Kubernetes (Go)](./projects/golang/http-server-kubernetes/) | Deploys a containerized Go service with production-style Kubernetes networking. | Go, Docker, Kubernetes, Ingress |
 | [Kubernetes API Server IP (Go)](./projects/golang/kubernetes-api-server-ip/) | Discovers the Kubernetes API server endpoint IP using the client-go library for cluster diagnostics. | Go, client-go, Kubernetes API |
 | [Kubernetes Operator (Go)](./projects/golang/kubernetes-operator/) | Extends Kubernetes with a custom controller to reconcile application resources declaratively. | Go, Kubebuilder, controller-runtime, Kubernetes |
@@ -64,7 +65,7 @@ I am targeting roles as:
 | Section | Projects |
 |---|---|
 | **DevOps** | [Argo CD GitOps](./projects/devops/argo-cd/), [GitHub Runner Kubernetes](./projects/devops/github-runner-kubernetes/), [GitLab on EKS](./projects/devops/gitlab/) |
-| **DevSecOps** | [Kyverno Policies](./projects/devsecops/kyverno-policies/) |
+| **DevSecOps** | [Kyverno Policies](./projects/devsecops/kyverno-policies/), [Strict mTLS with Istio](./projects/devsecops/istio-mtls/) |
 | **Golang** | [HTTP Server Kubernetes](./projects/golang/http-server-kubernetes/), [Kubernetes API Server IP](./projects/golang/kubernetes-api-server-ip/), [Kubernetes Operator](./projects/golang/kubernetes-operator/), [Unused Secret Detector](./projects/golang/unused-secret/) |
 | **Infrastructure as Code** | [Terraform Module: Ingress NGINX](./projects/iac/terraform-modules/ingress-nginx/), [Terraform Module: Traefik](./projects/iac/terraform-modules/traefik/) |
 | **Kubernetes** | [Amazon EKS Cluster](./projects/kubernetes/eks/), [Gateway API with Traefik](./projects/kubernetes/gateway-api/), [AI SRE: OOMKilled Remediation with kagent + Ollama](./projects/kubernetes/kagent-ollama-oomkilled/), [k3d Cluster Setup](./projects/kubernetes/k3d/) |
