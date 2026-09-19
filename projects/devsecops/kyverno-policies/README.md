@@ -18,8 +18,8 @@ flowchart TD
     kubectl["kubectl (Pod create request)"] --> webhook["Kyverno admission webhook<br/>(validate.kyverno.svc-fail)"]
     webhook --> p1["disallow-privileged-containers"]
     webhook --> p2["require-labels"]
-    p1 -->|blocks spec.containers[*].securityContext.privileged| result["allowed / denied response to the API server"]
-    p2 -->|blocks Pods missing metadata.labels.test| result
+    p1 -->|"blocks spec.containers[*].securityContext.privileged"| result["allowed / denied response to the API server"]
+    p2 -->|"blocks Pods missing metadata.labels.test"| result
 ```
 
 ## Repository Structure
