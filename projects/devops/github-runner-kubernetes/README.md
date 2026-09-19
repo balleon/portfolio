@@ -8,6 +8,16 @@ This project deploys GitHub Actions Runner Controller (ARC) on Kubernetes with T
 - Install `gha-runner-scale-set` for self-hosted runners.
 - Manage the full lifecycle with Terraform.
 
+## Architecture
+```mermaid
+flowchart LR
+    Terraform --> Controller["gha-runner-scale-set-controller"]
+    Terraform --> ScaleSet["gha-runner-scale-set"]
+    Controller -->|manages| ScaleSet
+    ScaleSet -->|provisions| Runners["Ephemeral runner Pods"]
+    Runners -->|register & pick up jobs| GitHub["GitHub Actions (repo/org)"]
+```
+
 ## Repository Structure
 - `main.tf`: Terraform resources for providers and Helm releases.
 - `variables.tf`: Input variables (including GitHub settings).

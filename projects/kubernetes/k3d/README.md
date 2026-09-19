@@ -11,6 +11,14 @@ This walkthrough uses HTTP and port 80 for local validation. Do not rely on plai
 - Install NGINX Ingress Controller using Helm.
 - Deploy and expose an NGINX test application.
 
+## Architecture
+```mermaid
+flowchart LR
+    Client --> IngressNginx["ingress-nginx controller"]
+    IngressNginx --> Service["nginx Service"]
+    Service --> Deployment["nginx Deployment"]
+```
+
 ## Repository Structure
 This project is command-driven and does not include manifest files; resources are created with `kubectl` and `helm` commands.
 

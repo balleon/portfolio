@@ -14,11 +14,12 @@ This project uses HTTP application traffic and namespace-wide `STRICT` mode for 
 - Demonstrate that an in-mesh client is admitted while an out-of-mesh client is rejected.
 
 ## Architecture
-```
-curl (secure ns, sidecar injected)  ──mTLS──►     httpbin (secure ns)
-                                                    ▲
-curl (default ns, no sidecar)       ──plaintext──┘   PeerAuthentication: STRICT
-                                                    └──► rejected (exit code 56)
+```mermaid
+flowchart LR
+    curlSecure["curl (secure ns, sidecar injected)"] -->|mTLS| PA{"PeerAuthentication: STRICT"}
+    curlDefault["curl (default ns, no sidecar)"] -->|plaintext| PA
+    PA -->|allowed| httpbin["httpbin (secure ns)"]
+    PA -->|rejected| exit["exit code 56"]
 ```
 
 ## Repository Structure

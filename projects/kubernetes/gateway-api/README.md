@@ -11,6 +11,15 @@ This setup exposes traffic over HTTP on port 80 for example purposes. Plain HTTP
 - Deploy NGINX application resources.
 - Route traffic with `GatewayClass`, `Gateway`, and `HTTPRoute`.
 
+## Architecture
+```mermaid
+flowchart LR
+    Client --> Gateway["Gateway (listener :80)"]
+    GatewayClass["GatewayClass (Traefik)"] -.configures.-> Gateway
+    Gateway --> HTTPRoute["HTTPRoute"]
+    HTTPRoute --> NGINX["nginx (Deployment + Service)"]
+```
+
 ## Repository Structure
 - `manifests/nginx/`: Namespace, Deployment, and Service for NGINX.
 - `manifests/gateway-class.yaml`: GatewayClass definition.

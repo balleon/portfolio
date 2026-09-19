@@ -8,6 +8,14 @@ This project bootstraps Argo CD with Helmfile and deploys an NGINX workload thro
 - Deploy an NGINX application from GitOps manifests.
 - Validate Argo CD synchronization flow end to end.
 
+## Architecture
+```mermaid
+flowchart LR
+    Helmfile -->|installs| ArgoCD["Argo CD"]
+    ArgoCD -->|watches & syncs| Application["Application CR (nginx)"]
+    Application --> NGINX["nginx Deployment"]
+```
+
 ## Repository Structure
 - `helmfile.yaml`: Argo CD installation definition.
 - `application.yaml`: Argo CD `Application` for NGINX deployment.

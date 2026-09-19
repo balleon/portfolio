@@ -12,6 +12,22 @@ This guide includes HTTP access checks on port 80 for validation only. Use HTTPS
 - Deploy Traefik Ingress Controller through Helm.
 - Create Kubernetes StorageClass for EKS Auto Mode.
 
+## Architecture
+```mermaid
+flowchart LR
+    subgraph vpc["VPC"]
+        Public["Public subnets"]
+        Private["Private subnets"]
+    end
+    Public --> EKS["EKS cluster"]
+    Private --> EKS
+    EKS -->|StorageClass| Storage["EKS Auto Mode storage"]
+    EKS --> Traefik["Traefik ingress controller"]
+    Client["client"] --> NLB["Network Load Balancer"]
+    NLB --> Traefik
+    Traefik --> Workload["Ingress-routed workload"]
+```
+
 ## Repository Structure
 - `main.tf`: core infrastructure and Helm resources.
 - `variables.tf`: project input variables.

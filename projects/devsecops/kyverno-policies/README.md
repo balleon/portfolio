@@ -13,15 +13,13 @@ This project uses `kubectl run` for demonstration purposes only and is not inten
 - Enforce required labels on resources.
 
 ## Architecture
-```
-kubectl (Pod create request)
-  │
-  ▼
-Kyverno admission webhook (validate.kyverno.svc-fail)
-  ├── disallow-privileged-containers  ──► blocks spec.containers[*].securityContext.privileged
-  └── require-labels                  ──► blocks Pods missing metadata.labels.test
-                    │
-                    └── allowed / denied response to the API server
+```mermaid
+flowchart TD
+    kubectl["kubectl (Pod create request)"] --> webhook["Kyverno admission webhook<br/>(validate.kyverno.svc-fail)"]
+    webhook --> p1["disallow-privileged-containers"]
+    webhook --> p2["require-labels"]
+    p1 -->|"blocks spec.containers[*].securityContext.privileged"| result["allowed / denied response to the API server"]
+    p2 -->|"blocks Pods missing metadata.labels.test"| result
 ```
 
 ## Repository Structure
