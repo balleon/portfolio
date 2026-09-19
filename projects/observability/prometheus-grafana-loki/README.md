@@ -11,20 +11,22 @@ This project uses HTTP for demonstration purposes only and is not intended for p
 - Expose observability tools behind a configured ingress hostname.
 
 ## Architecture
-```
-Kubernetes cluster
-  ├── Promtail (DaemonSet) ──► Loki (SingleBinary + MinIO)
-  │                                         │
-  └── kube-prometheus-stack                 │
-        ├── Prometheus                      │
-        ├── Alertmanager                    │
-        └── Grafana ◄────────────────────── ┘
-              (datasources: Prometheus, Loki)
-
-Traefik (ingress controller)
-  ├── /prometheus   → Prometheus
-  ├── /alertmanager → Alertmanager
-  └── /grafana      → Grafana
+```mermaid
+flowchart LR
+    Traefik["Traefik (ingress controller)"]
+    subgraph cluster["Kubernetes cluster"]
+        Promtail["Promtail (DaemonSet)"] --> Loki["Loki (SingleBinary + MinIO)"]
+        subgraph kps["kube-prometheus-stack"]
+            Prometheus
+            Alertmanager
+            Grafana["Grafana (datasources: Prometheus, Loki)"]
+        end
+        Prometheus --> Grafana
+        Loki --> Grafana
+    end
+    Traefik -->|/prometheus| Prometheus
+    Traefik -->|/alertmanager| Alertmanager
+    Traefik -->|/grafana| Grafana
 ```
 
 ## Repository Structure

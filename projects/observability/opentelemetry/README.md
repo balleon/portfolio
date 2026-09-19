@@ -14,16 +14,15 @@ This project uses HTTP for demonstration purposes only and is not intended for p
 - Route traces to Tempo, metrics to Prometheus, and logs to Loki through a single Collector pipeline.
 
 ## Architecture
-```
-Python Flask app
-  │  (auto-instrumented via Annotation — no code changes)
-  ▼
-OpenTelemetry Collector  (OTLP gRPC :4317 / HTTP :4318)
-  ├── traces   ──► Tempo
-  ├── metrics  ──► Prometheus  (OTLP receiver)
-  └── logs     ──► Loki        (OTLP endpoint)
-                    │
-                    └── Grafana (datasources: Prometheus, Loki, Tempo)
+```mermaid
+flowchart TD
+    App["Python Flask app<br/>(auto-instrumented via Annotation — no code changes)"] --> Collector["OpenTelemetry Collector<br/>(OTLP gRPC :4317 / HTTP :4318)"]
+    Collector -->|traces| Tempo
+    Collector -->|metrics| Prometheus["Prometheus (OTLP receiver)"]
+    Collector -->|logs| Loki["Loki (OTLP endpoint)"]
+    Tempo --> Grafana["Grafana (datasources: Prometheus, Loki, Tempo)"]
+    Prometheus --> Grafana
+    Loki --> Grafana
 ```
 
 ## Repository Structure

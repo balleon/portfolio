@@ -8,10 +8,22 @@ This project demonstrates AI-assisted Kubernetes operations using:
 Scenario: a pod crashes with `OOMKilled`, and kagent (backed by a free local Ollama model) helps diagnose and remediate the issue.
 
 ## Architecture
-- `ollama` runs in namespace `ollama` with a local model (`llama3.2`) pulled at startup.
-- `kagent` runs in namespace `kagent` with provider default set to Ollama.
-- A custom `ModelConfig` and `Agent` CR configure kagent for this use case.
-- A demo workload in namespace `oom-demo` is intentionally under-provisioned to trigger OOM kills.
+```mermaid
+flowchart LR
+    subgraph ollamaNs["namespace: ollama"]
+        Ollama["ollama (model: llama3.2)"]
+    end
+    subgraph kagentNs["namespace: kagent"]
+        ModelConfig["ModelConfig CR"] --> Kagent["kagent (provider: ollama)"]
+        Agent["Agent CR (oom-remediator)"] --> Kagent
+    end
+    subgraph oomNs["namespace: oom-demo"]
+        Workload["under-provisioned workload"]
+    end
+    Kagent -->|inference requests| Ollama
+    Workload -->|OOMKilled| Kagent
+    Kagent -->|diagnose & remediate| Workload
+```
 
 ## Repository Structure
 - `manifests/app/namespace.yaml`: namespace for the failing workload.

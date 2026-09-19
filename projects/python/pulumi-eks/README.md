@@ -12,6 +12,19 @@ This example provisions EKS with public endpoint access for demonstration purpos
 - Demonstrate Pulumi infrastructure-as-code patterns in Python.
 - Use configuration management for environment-specific settings.
 
+## Architecture
+```mermaid
+flowchart LR
+    subgraph vpc["VPC (multi-AZ)"]
+        Public["Public subnets"]
+        Private["Private subnets"]
+    end
+    Public --> EKS["EKS cluster"]
+    Private --> EKS
+    EKS --> NodePools["Auto-scaling node pools"]
+    Client["kubectl"] --> EKS
+```
+
 ## Repository Structure
 - `__main__.py`: Pulumi program defining AWS infrastructure.
 - `Pulumi.yaml`: Project metadata and runtime configuration.

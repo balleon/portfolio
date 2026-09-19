@@ -11,6 +11,15 @@ This example uses HTTP for demonstration and testing. HTTP traffic is unencrypte
 - Package the application as a container image.
 - Deploy with Kubernetes manifests (Namespace, Deployment, Service, Ingress).
 
+## Architecture
+```mermaid
+flowchart LR
+    Client -->|GET /version| Ingress
+    Ingress --> Service
+    Service --> Deployment["Go HTTP server (Deployment)"]
+    Deployment -->|client-go| APIServer["Kubernetes API server"]
+```
+
 ## Repository Structure
 - `source/`: Go source code and module.
 - `deploy/kubernetes/`: deployment manifests.

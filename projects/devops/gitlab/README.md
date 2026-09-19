@@ -18,6 +18,29 @@ GitLab is exposed over plain HTTP for testing purposes only; this is not recomme
 
 The container registry is disabled/out of scope.
 
+## Architecture
+```mermaid
+flowchart LR
+    Traefik["Traefik (existing ingress)"] --> Webservice["GitLab webservice"]
+    subgraph gitlab["GitLab (Helm chart)"]
+        Webservice
+        Sidekiq
+        Gitaly
+        Toolbox
+    end
+    Webservice --> RDS[("RDS PostgreSQL")]
+    Sidekiq --> RDS
+    Webservice -->|IRSA| S3[("S3 buckets")]
+    Sidekiq -->|IRSA| S3
+    Gitaly -->|IRSA| S3
+    Toolbox -->|IRSA| S3
+    Webservice --> Redis[("ElastiCache Redis")]
+    Sidekiq --> Redis
+    Toolbox --> Bootstrap["Bootstrap Job"]
+    Bootstrap -->|mints runner token| Runner["GitLab Runner (Kubernetes executor)"]
+    Runner -->|registers & picks up CI jobs| Webservice
+```
+
 ## Repository Structure
 - `data.tf`: lookups against the existing EKS cluster (VPC, subnets, security group, OIDC provider) and Traefik's Service (NLB hostname).
 - `rds.tf`: RDS PostgreSQL instance, subnet group and security group.
